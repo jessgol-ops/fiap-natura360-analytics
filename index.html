@@ -22,7 +22,7 @@
   --sb:56px;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{height:100%;font-size:14px;-webkit-font-smoothing:antialiased}
+html{height:100%;font-size:14px;-webkit-font-smoothing:antialiased;overflow-x:hidden}
 body{
   font-family:'DM Sans',sans-serif;
   background:var(--bg);color:var(--tx1);
@@ -30,6 +30,7 @@ body{
   display:grid;
   grid-template-columns:var(--sb) 1fr;
   grid-template-rows:auto 1fr;
+  overflow-x:hidden;
 }
 ::-webkit-scrollbar{width:4px;height:4px}
 ::-webkit-scrollbar-track{background:transparent}
@@ -106,7 +107,7 @@ body{
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.72)}}
 
 /* ── CONTENT ── */
-.content{grid-column:2;grid-row:2;padding:14px 18px 28px;overflow-y:auto;min-width:0}
+.content{grid-column:2;grid-row:2;padding:14px 18px 28px;overflow-y:auto;overflow-x:hidden;min-width:0}
 .section{display:none}
 .section.active{display:block;animation:fadeUp .28s ease}
 @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
@@ -176,7 +177,6 @@ body{
 .ch{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;gap:8px}
 .ct{font-size:13px;font-weight:600;color:var(--tx1);letter-spacing:-.1px}
 .cs{font-size:11px;color:var(--tx3);margin-top:2px}
-.cw{position:relative;width:100%;overflow:hidden} /* overflow:hidden prevents scroll */
 
 /* ── INFO BUTTON ── */
 .info-btn{
@@ -275,44 +275,150 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:17px;heigh
 .divd{border:none;border-top:1px solid var(--bdr);margin:12px 0}
 .footer{padding:18px;font-size:11px;color:var(--tx3);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;border-top:1px solid var(--bdr);margin-top:8px}
 
-/* ── CHART SECTION LABEL ── */
-.clabel{font-size:10px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+/* ═══════════════════════════════════════
+   CHART WRAPPER  — altura controlada por CSS
+   A classe .cw define --ch via modificador;
+   media queries sobrescrevem --ch em cada
+   breakpoint. Nenhum style inline é necessário.
+═══════════════════════════════════════ */
+.cw{position:relative;width:100%;min-width:0}
+.cw canvas{display:block;width:100%!important}
+
+/* tamanhos base (desktop) */
+.ch-xs {height:130px}
+.ch-sm {height:160px}
+.ch-md {height:200px}
+.ch-lg {height:230px}
+.ch-xl {height:270px}
+.ch-2xl{height:300px}
+
+/* ── GLOBAL: previne qualquer overflow horizontal ── */
+*{min-width:0}
+.section{min-width:0}
+.card,.kc{min-width:0}
+.g2,.g3,.g4,.g21,.g12,.kg,.kg-44,.kg-auto{min-width:0}
+/* Grids sempre fluid */
+.g2 >*,.g3 >*,.g4 >*,.g21 >*,.g12 >*{min-width:0}
+
+/* Tabelas sempre com scroll interno */
+.dtw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+
+/* Waterfall/funnel: label nunca extravasa */
+.wfr,.fnr{flex-wrap:nowrap}
+.wfl,.fnl{flex-shrink:0}
 
 /* ═══════════════════════════════════════
-   RESPONSIVE
+   RESPONSIVE  —  4 breakpoints
+   1200 → 960 → 680 → 400
 ═══════════════════════════════════════ */
-@media(max-width:1100px){
+
+/* ── ≤1200px: desktop médio ── */
+@media(max-width:1200px){
   .g3{grid-template-columns:1fr 1fr}
-  .g4,.kg-44{grid-template-columns:repeat(2,1fr)}
+  .g4{grid-template-columns:repeat(2,1fr)}
+  .kg-44{grid-template-columns:repeat(2,1fr)}
   .hmg{grid-template-columns:repeat(2,1fr)}
 }
-@media(max-width:840px){
+
+/* ── ≤960px: tablet ── */
+@media(max-width:960px){
   :root{--sb:0px}
   body{grid-template-columns:1fr}
   .sidebar{display:none}
   .topbar-wrap{grid-column:1;padding:10px 12px 0}
   .content{grid-column:1;padding:12px 12px 24px}
+
+  /* Grids 2+ col → 1 col */
   .g2,.g3,.g21,.g12{grid-template-columns:1fr}
-  .g4,.kg-44{grid-template-columns:repeat(2,1fr)}
+  /* Grids de 4 → 2 col */
+  .g4{grid-template-columns:repeat(2,1fr)}
+  .kg-44{grid-template-columns:repeat(2,1fr)}
   .kg-auto{grid-template-columns:repeat(2,1fr)}
   .hmg{grid-template-columns:repeat(2,1fr)}
-  .wfl{width:92px}.fnl{width:100px}
-  .pt{font-size:20px}
-  .tn{padding:5px 10px;font-size:11.5px}
+
+  /* Waterfall/funnel */
+  .wfl{width:110px}
+  .fnl{width:110px}
+
+  /* Topbar badges */
   .tb-badge.hide-md{display:none}
+  .tn{padding:5px 10px;font-size:11.5px}
+
+  /* Título */
+  .pt{font-size:20px}
+
+  /* Card padding */
+  .card{padding:14px}
+  .kc{padding:13px 13px 11px}
+
+  /* Alturas de chart menores em tablet */
+  .ch-xs {height:120px}
+  .ch-sm {height:150px}
+  .ch-md {height:190px}
+  .ch-lg {height:210px}
+  .ch-xl {height:240px}
+  .ch-2xl{height:260px}
 }
-@media(max-width:540px){
-  .topbar{padding:4px 4px 4px 12px;height:46px;gap:4px;border-radius:14px}
+
+/* ── ≤680px: mobile ── */
+@media(max-width:680px){
+  /* Topbar compact */
+  .topbar{border-radius:14px;height:46px;padding:4px 4px 4px 12px;gap:4px}
   .tb-name,.tb-sep{display:none}
   .tb-badge{display:none!important}
   .live{display:none}
-  .kg-44,.kg-auto,.g4{grid-template-columns:1fr 1fr}
   .tb-nav{gap:1px}
-  .tn{padding:5px 8px;font-size:11px}
+  .tn{padding:5px 9px;font-size:11px}
+
+  /* KPIs 2 col */
+  .kg-44,.kg-auto{grid-template-columns:repeat(2,1fr)}
+  .g4{grid-template-columns:repeat(2,1fr)}
+
+  /* Título */
   .pt{font-size:18px}
-  .wfl{width:80px;font-size:10px}
+  .ps{font-size:11px}
+
+  /* Waterfall/funnel mais estreito */
+  .wfl{width:86px;font-size:10px}
   .fnl{width:88px;font-size:10px}
+
+  /* Heatmap 2 col */
   .hmg{grid-template-columns:1fr 1fr}
+
+  /* Label slider some */
+  .sll{font-size:11px}
+
+  /* Alturas de chart menores em mobile */
+  .ch-xs {height:110px}
+  .ch-sm {height:140px}
+  .ch-md {height:170px}
+  .ch-lg {height:190px}
+  .ch-xl {height:210px}
+  .ch-2xl{height:220px}
+
+  /* Insights: ícone menor */
+  .insi{width:28px;height:28px;font-size:14px}
+
+  /* Risk rows: quebra badge */
+  .rkr{flex-wrap:wrap;gap:5px}
+}
+
+/* ── ≤400px: mobile pequeno ── */
+@media(max-width:400px){
+  .kg-44,.kg-auto,.g4{grid-template-columns:1fr}
+  .tn{padding:4px 7px;font-size:10.5px}
+  .pt{font-size:16px}
+  .wfl{width:72px;font-size:9.5px}
+  .fnl{width:74px;font-size:9.5px}
+  .hmg{grid-template-columns:1fr}
+
+  /* Alturas mínimas */
+  .ch-xs {height:100px}
+  .ch-sm {height:120px}
+  .ch-md {height:150px}
+  .ch-lg {height:170px}
+  .ch-xl {height:185px}
+  .ch-2xl{height:200px}
 }
 </style>
 </head>
@@ -401,11 +507,11 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:17px;heigh
   <div class="g3">
     <div class="card">
       <div class="ch"><div><div class="ct">Boleto vs. Aproxima Aê</div></div><button class="info-btn" data-title="Comparativo boleto vs. Aproxima Aê" data-body="4 fatores: risco zero, receita nova, velocidade D+1 e parcelamento. O risco de calote (100% Natura no boleto) passa a 0% no modelo digital." data-src="Análise estratégica 4GETT">i</button></div>
-      <div class="cw" style="height:182px"><canvas id="chartCompar"></canvas></div>
+      <div class="cw ch-sm"><canvas id="chartCompar"></canvas></div>
     </div>
     <div class="card">
       <div class="ch"><div><div class="ct">PDD por canal</div></div><button class="info-btn" data-title="Distribuição do PDD por canal" data-body="89% da inadimplência gerada por boletos. Emana Pay: apenas 8% do PDD — evidência de que a digitalização reduz drasticamente o risco." data-src="Estimativa operacional Natura 2024">i</button></div>
-      <div class="cw" style="height:140px"><canvas id="chartPDD"></canvas></div>
+      <div class="cw ch-xs"><canvas id="chartPDD"></canvas></div>
       <div class="leg" style="justify-content:center;margin-top:8px">
         <div class="li"><div class="lsq" style="background:var(--r5)"></div><span>Boleto 89%</span></div>
         <div class="li"><div class="lsq" style="background:var(--n6)"></div><span>Emana Pay 8%</span></div>
@@ -414,7 +520,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:17px;heigh
     </div>
     <div class="card">
       <div class="ch"><div><div class="ct">Mercado BPC LatAm</div></div><button class="info-btn" data-title="Crescimento BPC LatAm" data-body="+18% Q1/2025, CAGR 6,2% até 2028. Janela para digitalização acelerada antes da concorrência." data-src="Euromonitor 2025 · NielsenIQ 2025">i</button></div>
-      <div class="cw" style="height:182px"><canvas id="chartMercado"></canvas></div>
+      <div class="cw ch-sm"><canvas id="chartMercado"></canvas></div>
     </div>
   </div>
 </div>
@@ -448,12 +554,12 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:17px;heigh
   <div class="g2">
     <div class="card">
       <div class="ch"><div><div class="ct">Margem acumulada 2026–2030</div><div class="cs">+15%/ano crescimento orgânico de adoção</div></div><button class="info-btn" data-title="Projeção de margem acumulada" data-body="H1/26 = lançamento; H2/26 = parcial; 2027 = plena LatAm; 2028–30 = ecossistema maduro." data-src="Projeção 4GETT">i</button></div>
-      <div class="cw" style="height:230px"><canvas id="chartMargem"></canvas></div>
+      <div class="cw ch-lg"><canvas id="chartMargem"></canvas></div>
       <div class="leg"><div class="li"><div class="lsq" style="background:rgba(29,158,117,.4)"></div><span>Margem anual</span></div><div class="li"><div class="lsq" style="background:var(--n6)"></div><span>Acumulado</span></div></div>
     </div>
     <div class="card">
       <div class="ch"><div><div class="ct">Composição por fonte (2026–2030)</div><div class="cs">Fontes de receita empilhadas por ano</div></div><button class="info-btn" data-title="Fontes de receita" data-body="100% de migração: PDD R$726M + antecipação R$500M + MDR R$300M = R$1,5Bi/ano." data-src="Projeção 4GETT">i</button></div>
-      <div class="cw" style="height:230px"><canvas id="chartFontes"></canvas></div>
+      <div class="cw ch-lg"><canvas id="chartFontes"></canvas></div>
       <div class="leg"><div class="li"><div class="lsq" style="background:var(--n6)"></div><span>PDD evitado</span></div><div class="li"><div class="lsq" style="background:var(--g4)"></div><span>Antecipação</span></div><div class="li"><div class="lsq" style="background:var(--g5)"></div><span>MDR líquido</span></div></div>
     </div>
   </div>
@@ -499,7 +605,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:17px;heigh
   <!-- NOVO: Gráfico adoção acumulado + visão gradual -->
   <div class="card mb">
     <div class="ch"><div><div class="ct">Adoção do ecossistema — acumulado e progressão mensal</div><div class="cs">Volume absoluto de consultoras digitais · projeção vs. realizado · mai/2026–dez/2027</div></div><button class="info-btn" data-title="Curva de adoção acumulada" data-body="Linha cheia = realizado (dado real até mai/2026). Linha tracejada = projeção meta. Barras = crescimento incremental mensal (novas ativações). A área verde representa a base acumulada ativa." data-src="Sensedia 2024 · projeção 4GETT">i</button></div>
-    <div class="cw" style="height:280px"><canvas id="chartAdocaoAcum"></canvas></div>
+    <div class="cw ch-xl"><canvas id="chartAdocaoAcum"></canvas></div>
     <div class="leg">
       <div class="li"><div class="lsq" style="background:var(--n6)"></div><span>Realizado (acumulado)</span></div>
       <div class="li"><div class="lsq" style="background:rgba(29,158,117,.4);border:1px dashed var(--n6)"></div><span>Projeção meta</span></div>
@@ -509,7 +615,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:17px;heigh
 
   <div class="card mb">
     <div class="ch"><div><div class="ct">3 alavancas simultâneas — projeção 2026–2027</div><div class="cs">Adoção % · CPF identificados · Redução de PDD</div></div><button class="info-btn" data-title="Projeção das 3 alavancas" data-body="Interdependentes: mais adoção → mais CPFs → score mais preciso → menos PDD → mais crédito → mais vendas. Ciclo virtuoso fecha em set/2026." data-src="Projeção técnica 4GETT">i</button></div>
-    <div class="cw" style="height:240px"><canvas id="chartAdocao"></canvas></div>
+    <div class="cw ch-lg"><canvas id="chartAdocao"></canvas></div>
     <div class="leg"><div class="li"><div class="lsq" style="background:var(--n6)"></div><span>Adoção Emana Pay %</span></div><div class="li"><div class="lsq" style="background:var(--g4)"></div><span>CPF identificados %</span></div><div class="li"><div class="lsq" style="background:var(--r5)"></div><span>PDD % (reduzindo)</span></div></div>
   </div>
 </div>
@@ -528,7 +634,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:17px;heigh
   <!-- Gráfico principal: curva de inadimplência por canal -->
   <div class="card mb">
     <div class="ch"><div><div class="ct">Curva de inadimplência — Emana Pay vs. Boleto</div><div class="cs">% PDD mensal por canal · realizado até mai/2026 · projeção até dez/2027</div></div><button class="info-btn" data-title="Evolução do PDD por canal" data-body="Boleto: PDD estável em ~12% pois não tem dado de CPF nem score preditivo. Emana Pay: PDD já começa menor (4,3%) e cai conforme o score IA matura após mai/2026. A área entre as curvas = oportunidade capturada." data-src="RI Natura 2024 · projeção 4GETT">i</button></div>
-    <div class="cw" style="height:300px"><canvas id="chartInadCurva"></canvas></div>
+    <div class="cw ch-2xl"><canvas id="chartInadCurva"></canvas></div>
     <div class="leg">
       <div class="li"><div class="lsq" style="background:var(--r5)"></div><span>PDD Boleto (realizado)</span></div>
       <div class="li"><div class="lsq" style="background:var(--n6)"></div><span>PDD Emana Pay (realizado)</span></div>
@@ -541,7 +647,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:17px;heigh
     <!-- Gráfico PDD acumulado: projeção vs. realizado -->
     <div class="card">
       <div class="ch"><div><div class="ct">PDD acumulado — projeção vs. realizado</div><div class="cs">R$M evitados mês a mês · mai/2026–dez/2027</div></div><button class="info-btn" data-title="Acompanhamento de PDD evitado" data-body="Barras = PDD evitado realizado (consultoras já migradas). Linha = meta de projeção. Desvio positivo = melhor que o planejado. Aceleração esperada após jul/2026 com score IA em shadow testing." data-src="Simulação financeira 4GETT">i</button></div>
-      <div class="cw" style="height:260px"><canvas id="chartPDDAcum"></canvas></div>
+      <div class="cw ch-xl"><canvas id="chartPDDAcum"></canvas></div>
       <div class="leg">
         <div class="li"><div class="lsq" style="background:var(--n6)"></div><span>Realizado (R$M)</span></div>
         <div class="li"><div class="lsq" style="background:rgba(29,158,117,.3)"></div><span>Projeção meta (R$M)</span></div>
@@ -551,7 +657,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:17px;heigh
     <!-- Barras mensais de redução -->
     <div class="card">
       <div class="ch"><div><div class="ct">Redução mensal do PDD consolidado</div><div class="cs">Queda gradual mês a mês · pontos percentuais</div></div><button class="info-btn" data-title="Queda gradual do PDD" data-body="Cada mês de migração digital reduz o PDD consolidado. A queda se acelera em ago/2026 (shadow testing concluído) e em mar/2027 (score IA em produção plena na Argentina)." data-src="Projeção 4GETT">i</button></div>
-      <div class="cw" style="height:260px"><canvas id="chartPDDMes"></canvas></div>
+      <div class="cw ch-xl"><canvas id="chartPDDMes"></canvas></div>
       <div class="leg">
         <div class="li"><div class="lsq" style="background:var(--n6)"></div><span>PDD consolidado % (realizado)</span></div>
         <div class="li"><div class="lsq" style="background:var(--r5);opacity:.5"></div><span>Meta máxima aceitável</span></div>
@@ -569,7 +675,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:17px;heigh
     <div class="card">
       <div class="ch"><div><div class="ct">Acurácia do modelo — shadow testing</div><div class="cs">4 meses sem bloquear transações</div></div><button class="info-btn" data-title="Shadow testing do score" data-body="IA calcula o score mas NÃO bloqueia a venda. Compara previsão com inadimplência real. >85% → ativa bloqueio gradual: C/D → Pix; A+ → microcrédito." data-src="CDO Natura · McKinsey">i</button></div>
       <!-- height fixo, canvas com maxHeight garantido -->
-      <div class="cw" style="height:200px"><canvas id="chartScore"></canvas></div>
+      <div class="cw ch-md"><canvas id="chartScore"></canvas></div>
       <div class="leg"><div class="li"><div class="lsq" style="background:var(--n6)"></div><span>Acurácia modelo ML</span></div><div class="li"><div class="lsq" style="background:var(--r5)"></div><span>Meta mínima 85%</span></div></div>
     </div>
     <div class="card">
@@ -590,7 +696,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:17px;heigh
   <div class="card mb">
     <div class="ch"><div><div class="ct">Impacto no PDD — simulação por cohort (12 meses)</div><div class="cs">Comparativo: grupo controle (boleto) vs. tratado (Aproxima Aê + score IA)</div></div><button class="info-btn" data-title="Redução de PDD por cohort" data-body="A diferença entre as curvas = PDD evitado. >85% acurácia → redução de 30% do PDD no mês 6." data-src="Simulação 4GETT · McKinsey 2024">i</button></div>
     <!-- height menor para caber sem scroll horizontal -->
-    <div class="cw" style="height:220px"><canvas id="chartCohort"></canvas></div>
+    <div class="cw ch-md"><canvas id="chartCohort"></canvas></div>
     <div class="leg"><div class="li"><div class="lsq" style="background:var(--r5)"></div><span>Cohort controle (boleto)</span></div><div class="li"><div class="lsq" style="background:var(--n6)"></div><span>Cohort tratado (score IA)</span></div></div>
   </div>
 </div>
@@ -608,8 +714,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:17px;heigh
     </div>
   </div>
   <div class="g2">
-    <div class="card"><div class="ch"><div><div class="ct">PDD por país</div></div><button class="info-btn" data-title="PDD por mercado" data-body="Argentina lidera em PDD relativo (15,4%). Brasil tem menor relativo mas concentra maior volume absoluto — R$726M/ano." data-src="Análise 4GETT · Natura 2024">i</button></div><div class="cw" style="height:200px"><canvas id="chartPDDRegion"></canvas></div></div>
-    <div class="card"><div class="ch"><div><div class="ct">Distribuição de consultoras</div></div><button class="info-btn" data-title="Consultoras por mercado" data-body="Brasil: 58% da base LatAm (1,8M). Cada consultora digitalizada = ~R$3.200/ano de margem adicional." data-src="Relatório Integrado Natura 2024">i</button></div><div class="cw" style="height:170px"><canvas id="chartConsultoras"></canvas></div><div class="leg" style="justify-content:center;margin-top:8px"><div class="li"><div class="lsq" style="background:var(--n6)"></div><span>Brasil 58%</span></div><div class="li"><div class="lsq" style="background:var(--r5)"></div><span>Argentina 20%</span></div><div class="li"><div class="lsq" style="background:var(--g4)"></div><span>México 14%</span></div><div class="li"><div class="lsq" style="background:var(--tx3)"></div><span>Outros 8%</span></div></div></div>
+    <div class="card"><div class="ch"><div><div class="ct">PDD por país</div></div><button class="info-btn" data-title="PDD por mercado" data-body="Argentina lidera em PDD relativo (15,4%). Brasil tem menor relativo mas concentra maior volume absoluto — R$726M/ano." data-src="Análise 4GETT · Natura 2024">i</button></div><div class="cw ch-md"><canvas id="chartPDDRegion"></canvas></div></div>
+    <div class="card"><div class="ch"><div><div class="ct">Distribuição de consultoras</div></div><button class="info-btn" data-title="Consultoras por mercado" data-body="Brasil: 58% da base LatAm (1,8M). Cada consultora digitalizada = ~R$3.200/ano de margem adicional." data-src="Relatório Integrado Natura 2024">i</button></div><div class="cw ch-sm"><canvas id="chartConsultoras"></canvas></div><div class="leg" style="justify-content:center;margin-top:8px"><div class="li"><div class="lsq" style="background:var(--n6)"></div><span>Brasil 58%</span></div><div class="li"><div class="lsq" style="background:var(--r5)"></div><span>Argentina 20%</span></div><div class="li"><div class="lsq" style="background:var(--g4)"></div><span>México 14%</span></div><div class="li"><div class="lsq" style="background:var(--tx3)"></div><span>Outros 8%</span></div></div></div>
   </div>
 </div>
 
@@ -637,7 +743,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:17px;heigh
 <div id="tab-riscos" class="section">
   <div class="ph"><div class="ph-row"><div><div class="pt">Riscos de dados — probabilidade × impacto</div><div class="ps">Mapeamento completo com planos de mitigação</div></div></div></div>
   <div class="g2">
-    <div class="card"><div class="ch"><div><div class="ct">Matriz probabilidade × impacto</div></div><button class="info-btn" data-title="Matriz de riscos" data-body="Probabilidade (X) × impacto (Y). Bolha = severidade relativa. Quadrante superior direito → mitigação imediata." data-src="4GETT · LGPD + Bacen + PCI-DSS">i</button></div><div class="cw" style="height:225px"><canvas id="chartRiscos"></canvas></div></div>
+    <div class="card"><div class="ch"><div><div class="ct">Matriz probabilidade × impacto</div></div><button class="info-btn" data-title="Matriz de riscos" data-body="Probabilidade (X) × impacto (Y). Bolha = severidade relativa. Quadrante superior direito → mitigação imediata." data-src="4GETT · LGPD + Bacen + PCI-DSS">i</button></div><div class="cw ch-md"><canvas id="chartRiscos"></canvas></div></div>
     <div class="card">
       <div class="ch"><div><div class="ct">Resumo por categoria</div></div><button class="info-btn" data-title="Categorias de risco" data-body="3 categorias: regulatório, técnico e cultural. Cada uma com estratégia distinta de mitigação e responsável designado." data-src="Análise de risco 4GETT">i</button></div>
       <div class="prr" style="margin-top:6px"><div class="prl"><span>Regulatório / legal</span><span style="color:var(--r5)">Alto</span></div><div class="prt"><div class="prf" style="width:75%;background:var(--r5)"></div></div></div>
@@ -828,7 +934,37 @@ function buildCharts(){
   new Chart('chartRiscos',{type:'bubble',data:{datasets:[{label:'Violação de dados',data:[{x:60,y:90,r:16}],backgroundColor:'rgba(217,64,64,.22)',borderColor:R},{label:'Viés ML',data:[{x:55,y:80,r:13}],backgroundColor:'rgba(217,64,64,.14)',borderColor:R},{label:'Qualidade CPF',data:[{x:50,y:55,r:11}],backgroundColor:'rgba(212,136,15,.22)',borderColor:G4},{label:'Concentração tech',data:[{x:30,y:60,r:10}],backgroundColor:'rgba(212,136,15,.14)',borderColor:G4},{label:'Resistência cultural',data:[{x:25,y:30,r:8}],backgroundColor:'rgba(29,158,117,.18)',borderColor:N}]},options:{responsive:true,maintainAspectRatio:false,layout:{padding:14},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.dataset.label}}},scales:{x:{min:0,max:100,grid:{color:GC},ticks:{color:TC},title:{display:true,text:'Probabilidade →',color:TC,font:{size:10}}},y:{min:0,max:100,grid:{color:GC},ticks:{color:TC},title:{display:true,text:'Impacto →',color:TC,font:{size:10}}}}}});
 }
 
-window.addEventListener('load',()=>{buildCharts();window.cBuilt=true});
+window.addEventListener('load',()=>{buildCharts();window.cBuilt=true;
+
+  /* ── ResizeObserver: força redraw de todos os charts ao redimensionar ── */
+  if(typeof ResizeObserver!=='undefined'){
+    const ro=new ResizeObserver(()=>{
+      /* Chart.js responde a resize do canvas container automaticamente
+         quando responsive:true, mas só se o container muda de tamanho no DOM.
+         Forçamos o resize manualmente para garantir em todos os browsers. */
+      if(Chart&&Chart.instances){
+        Object.values(Chart.instances).forEach(c=>{
+          try{c.resize()}catch(e){}
+        });
+      }
+    });
+    /* Observa o container de conteúdo e o body */
+    const contentEl=document.querySelector('.content');
+    if(contentEl)ro.observe(contentEl);
+    ro.observe(document.body);
+  }
+
+  /* Fallback: debounce no resize da janela */
+  let _rzt;
+  window.addEventListener('resize',()=>{
+    clearTimeout(_rzt);
+    _rzt=setTimeout(()=>{
+      if(Chart&&Chart.instances){
+        Object.values(Chart.instances).forEach(c=>{try{c.resize()}catch(e){}});
+      }
+    },120);
+  },{passive:true});
+});
 
 /* ═══════════ SIMULATOR ═══════════ */
 function initSim(){
