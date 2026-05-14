@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Natura · Ecossistema 360 — Visão Analítica</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root{
+  --n9:#03302A;--n8:#074F3D;--n7:#0F6E56;--n6:#1D9E75;
+  --n5:#3DB88B;--n4:#62CBA5;--n3:#9FE1CB;--n2:#CCF0E4;--n1:#EAF9F3;
+  --g6:#7A4A06;--g5:#B36E10;--g4:#EF9F27;--g2:#FAC97A;--g1:#FDF5E4;
+  --r6:#8B2020;--r5:#D94040;--r2:#FAC5C5;--r1:#FEF0F0;
+  --bg:#EDECEA;--bg2:#E4E3DF;
+  --surf:#FFFFFF;--surf2:#F8F7F4;
+  --bdr:rgba(0,0,0,.07);--bdr2:rgba(0,0,0,.11);
+  --tx1:#0F0F0E;--tx2:#4A4A48;--tx3:#95938E;
+  --rad:18px;--rad-sm:12px;
+  --sh:0 1px 1px rgba(0,0,0,.03),0 2px 10px rgba(0,0,0,.06);
+  --sh-top:0 4px 28px rgba(0,0,0,.10),0 1px 3px rgba(0,0,0,.05);
+  --sb:56px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{height:100%;font-size:14px;-webkit-font-smoothing:antialiased}
+body{
+  font-family:'DM Sans',sans-serif;
+  background:var(--bg);color:var(--tx1);
+  min-height:100%;line-height:1.55;
+  display:grid;
+  grid-template-columns:var(--sb) 1fr;
+  grid-template-rows:auto 1fr;
+}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--n3);border-radius:4px}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  grid-column:1;grid-row:1/3;
+  position:fixed;top:0;left:0;width:var(--sb);height:100svh;
+  background:var(--surf);border-right:1px solid var(--bdr);
+  display:flex;flex-direction:column;align-items:center;
+  padding:16px 0 14px;z-index:400;
+}
+.sb-logo{width:32px;height:32px;background:var(--n6);border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:18px;flex-shrink:0}
+.sb-logo svg{width:17px;height:17px;fill:#fff}
+.sb-nav{display:flex;flex-direction:column;align-items:center;gap:2px;width:100%;padding:0 6px;flex:1}
+.sb-btn{
+  position:relative;width:40px;height:40px;border-radius:11px;
+  border:none;background:transparent;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;color:var(--tx3);
+  transition:background .16s,color .16s;outline:none;
+}
+.sb-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.sb-btn:hover{background:var(--n1);color:var(--n7)}
+.sb-btn.active{background:var(--n1);color:var(--n6)}
+.sb-btn::after{
+  content:attr(data-tip);
+  position:absolute;left:calc(100% + 10px);top:50%;transform:translateY(-50%);
+  background:var(--tx1);color:#fff;font-size:11px;line-height:1;
+  padding:5px 9px;border-radius:7px;white-space:nowrap;
+  opacity:0;pointer-events:none;transition:opacity .14s;z-index:500;
+}
+.sb-btn:hover::after{opacity:1}
+.sb-sep{width:24px;height:1px;background:var(--bdr);margin:6px 0}
+.sb-avatar{
+  width:30px;height:30px;border-radius:50%;background:var(--n6);color:#fff;
+  font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;
+  letter-spacing:-.3px;margin-top:auto;flex-shrink:0;
+}
+
+/* ── TOPBAR ── */
+.topbar-wrap{
+  grid-column:2;grid-row:1;
+  position:sticky;top:0;z-index:300;
+  padding:12px 18px 0;pointer-events:none;background:transparent;
+}
+.topbar{
+  pointer-events:all;background:var(--surf);border-radius:999px;
+  box-shadow:var(--sh-top);border:1px solid var(--bdr);
+  height:50px;display:flex;align-items:center;
+  padding:5px 5px 5px 16px;gap:6px;
+}
+.tb-brand{display:flex;align-items:center;gap:7px;flex-shrink:0}
+.tb-icon{width:26px;height:26px;background:var(--n6);border-radius:8px;display:flex;align-items:center;justify-content:center}
+.tb-icon svg{width:14px;height:14px;fill:#fff}
+.tb-name{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--tx1);white-space:nowrap}
+.tb-sep{width:1px;height:20px;background:var(--bdr2);flex-shrink:0;margin:0 2px}
+.tb-nav{display:flex;align-items:center;gap:2px;flex:1;min-width:0;overflow-x:auto;scrollbar-width:none}
+.tb-nav::-webkit-scrollbar{display:none}
+.tn{
+  padding:7px 13px;border-radius:999px;border:none;background:transparent;
+  font-size:12px;font-weight:500;color:var(--tx3);cursor:pointer;white-space:nowrap;
+  font-family:'DM Sans',sans-serif;line-height:1;
+  transition:background .14s,color .14s;outline:none;
+}
+.tn:hover{color:var(--tx2);background:var(--bg2)}
+.tn.active{background:var(--n6);color:#fff;box-shadow:0 1px 5px rgba(29,158,117,.3)}
+.tb-right{display:flex;align-items:center;gap:5px;flex-shrink:0}
+.tb-badge{font-size:11px;font-weight:500;padding:5px 11px;border-radius:999px;white-space:nowrap;line-height:1}
+.tbg{background:rgba(29,158,117,.1);color:var(--n7);border:1px solid rgba(29,158,117,.18)}
+.tbo{background:rgba(239,159,39,.1);color:var(--g6);border:1px solid rgba(239,159,39,.18)}
+.tbr{background:rgba(217,64,64,.08);color:var(--r6);border:1px solid rgba(217,64,64,.16)}
+.live{width:7px;height:7px;border-radius:50%;background:var(--n5);flex-shrink:0;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.72)}}
+
+/* ── CONTENT ── */
+.content{grid-column:2;grid-row:2;padding:14px 18px 28px;overflow-y:auto;min-width:0}
+.section{display:none}
+.section.active{display:block;animation:fadeUp .28s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.ph{margin-bottom:16px}
+.ph-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.pt{font-family:'Syne',sans-serif;font-size:24px;font-weight:700;letter-spacing:-.5px;color:var(--tx1)}
+.ps{font-size:12px;color:var(--tx3);margin-top:3px}
+
+/* ── GRIDS ── */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px}
+.g21{display:grid;grid-template-columns:2fr 1fr;gap:12px;margin-bottom:12px}
+.g12{display:grid;grid-template-columns:1fr 2fr;gap:12px;margin-bottom:12px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px}
+.mb{margin-bottom:12px}
+
+/* ── CARD ── */
+.card{
+  background:var(--surf);border-radius:var(--rad);padding:18px;
+  box-shadow:var(--sh);border:1px solid var(--bdr);
+  position:relative;transition:box-shadow .2s;
+}
+.card:hover{box-shadow:var(--sh-top)}
+
+/* ── KPI ──
+   .kc uses flex-column so the bar always sticks to the bottom
+*/
+.kg{display:grid;gap:12px;margin-bottom:12px}
+/* Visão geral: 4 + 4 (duas linhas fixas) */
+.kg-44{grid-template-columns:repeat(4,1fr)}
+/* Other tabs: auto-fit */
+.kg-auto{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+
+.kc{
+  background:var(--surf);border-radius:var(--rad);padding:16px 16px 13px;
+  box-shadow:var(--sh);border:1px solid var(--bdr);
+  position:relative;overflow:hidden;
+  display:flex;flex-direction:column;        /* ← flex column */
+  transition:box-shadow .2s;
+}
+.kc:hover{box-shadow:var(--sh-top)}
+.kc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--rad) var(--rad) 0 0}
+.kc-g::before{background:linear-gradient(90deg,var(--n6),var(--n4))}
+.kc-o::before{background:linear-gradient(90deg,var(--g5),var(--g4))}
+.kc-r::before{background:linear-gradient(90deg,var(--r5),#EE7070)}
+.kc-n::before{background:var(--tx3)}
+
+.kt{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:7px}
+.kl{font-size:10px;font-weight:500;color:var(--tx3);text-transform:uppercase;letter-spacing:.55px;line-height:1.4;padding-right:3px}
+
+/* Big number: DM Sans (not Syne) */
+.kv{
+  font-family:'DM Sans',sans-serif;
+  font-size:26px;font-weight:700;color:var(--tx1);
+  letter-spacing:-.5px;line-height:1;
+}
+.kv.g{color:var(--n6)}.kv.o{color:var(--g5)}.kv.r{color:var(--r5)}
+
+.kd{font-size:11px;font-weight:500;margin-top:4px;flex:1}  /* flex:1 pushes bar down */
+.kd.u{color:var(--n6)}.kd.d{color:var(--r5)}.kd.m{color:var(--tx3)}
+
+/* Bar always at bottom */
+.kb{height:3px;background:var(--bg2);border-radius:2px;margin-top:10px;overflow:hidden;flex-shrink:0}
+.kbf{height:100%;border-radius:2px}
+
+/* ── CARD HEADER ── */
+.ch{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;gap:8px}
+.ct{font-size:13px;font-weight:600;color:var(--tx1);letter-spacing:-.1px}
+.cs{font-size:11px;color:var(--tx3);margin-top:2px}
+.cw{position:relative;width:100%;overflow:hidden} /* overflow:hidden prevents scroll */
+
+/* ── INFO BUTTON ── */
+.info-btn{
+  width:21px;height:21px;border-radius:50%;
+  background:var(--surf2);border:1.5px solid var(--bdr2);
+  color:var(--tx3);font-size:11px;font-weight:700;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;font-family:'DM Sans',sans-serif;
+  transition:background .14s,color .14s,border-color .14s;
+  user-select:none;line-height:1;
+}
+.info-btn:hover,.info-btn.act{background:var(--n1);color:var(--n7);border-color:var(--n4)}
+
+/* ── TOOLTIP ── */
+#tt{
+  position:fixed;z-index:9999;width:268px;background:var(--surf);
+  border:1px solid rgba(29,158,117,.22);border-radius:14px;
+  padding:13px 15px;box-shadow:0 10px 32px rgba(0,0,0,.13);
+  pointer-events:none;opacity:0;transform:translateY(7px);
+  transition:opacity .16s,transform .16s;font-size:12px;color:var(--tx2);line-height:1.55;
+}
+#tt.show{opacity:1;transform:translateY(0)}
+#tt-title{font-weight:700;color:var(--n7);margin-bottom:5px;font-size:12.5px}
+#tt-body{line-height:1.55}
+#tt-src{margin-top:8px;font-size:11px;color:var(--tx3);border-top:1px solid var(--bdr);padding-top:6px}
+#tt-ar{
+  position:absolute;width:10px;height:10px;background:var(--surf);
+  border:1px solid rgba(29,158,117,.22);transform:rotate(45deg);
+  top:-6px;left:50%;margin-left:-5px;border-bottom:none;border-right:none;
+}
+
+/* ── LEGEND ── */
+.leg{display:flex;flex-wrap:wrap;gap:10px;font-size:11px;color:var(--tx3);margin-top:10px}
+.li{display:flex;align-items:center;gap:5px}
+.lsq{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+
+/* ── WATERFALL ── */
+.wfr{display:flex;align-items:center;gap:9px;margin-bottom:7px}
+.wfl{font-size:11px;color:var(--tx3);width:155px;flex-shrink:0;text-align:right}
+.wft{flex:1;height:26px;background:var(--bg2);border-radius:7px;overflow:hidden}
+.wff{height:100%;border-radius:7px;display:flex;align-items:center;padding-left:10px;font-size:11.5px;font-weight:500;white-space:nowrap;overflow:hidden}
+
+/* ── FUNNEL ── */
+.fnr{display:flex;align-items:center;gap:9px;margin-bottom:7px}
+.fnl{font-size:11px;color:var(--tx3);width:136px;flex-shrink:0}
+.fnt{flex:1;height:25px;background:var(--bg2);border-radius:7px;overflow:hidden}
+.fnf{height:100%;border-radius:7px;display:flex;align-items:center;padding-left:10px;font-size:11.5px;font-weight:500}
+
+/* ── PROGRESS ── */
+.prr{margin-bottom:9px}
+.prl{display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px}
+.prl span:first-child{color:var(--tx3)}.prl span:last-child{color:var(--tx1);font-weight:500}
+.prt{height:6px;background:var(--bg2);border-radius:3px;overflow:hidden}
+.prf{height:100%;border-radius:3px}
+
+/* ── RISK ROWS ── */
+.rkr{display:flex;gap:11px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--bdr)}
+.rkr:last-child{border-bottom:none}
+.rkp{font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap;flex-shrink:0;margin-top:2px}
+.rkd{font-size:13px;color:var(--tx1)}
+.rkm{font-size:12px;color:var(--tx3);margin-top:3px}
+
+/* ── TABLE ── */
+.dtw{border-radius:var(--rad-sm);overflow:hidden;border:1px solid var(--bdr)}
+.dt{width:100%;border-collapse:collapse;font-size:12px}
+.dt th{padding:8px 12px;text-align:left;font-size:10px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--bdr);background:var(--surf2)}
+.dt td{padding:8px 12px;border-bottom:1px solid var(--bdr);color:var(--tx1)}
+.dt tr:last-child td{border-bottom:none}
+.dt tr:hover td{background:rgba(0,0,0,.015)}
+
+/* ── SLIDER ── */
+.slw{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.sll{font-size:13px;color:var(--tx3);white-space:nowrap}
+input[type=range]{flex:1;-webkit-appearance:none;height:4px;border-radius:2px;background:var(--bg2);outline:none;border:1px solid var(--bdr2)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:17px;height:17px;border-radius:50%;background:var(--n6);cursor:pointer;border:2.5px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.16)}
+.slv{font-size:15px;font-weight:700;color:var(--n6);min-width:40px}
+
+/* ── HEATMAP ── */
+.hmg{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.hmc{padding:13px;border-radius:var(--rad-sm);text-align:center;border:1px solid var(--bdr)}
+
+/* ── TAGS ── */
+.tag{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500}
+.tg{background:rgba(29,158,117,.09);color:var(--n7)}
+.to{background:rgba(212,136,15,.09);color:var(--g6)}
+.tr{background:rgba(217,64,64,.09);color:var(--r6)}
+.tb{background:rgba(50,120,220,.09);color:#185FA5}
+.tx{background:var(--surf2);color:var(--tx3)}
+
+/* ── INSIGHTS ── */
+.insr{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--bdr)}
+.insr:last-child{border-bottom:none}
+.insi{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px;font-weight:700}
+
+/* ── DIVIDER + FOOTER ── */
+.divd{border:none;border-top:1px solid var(--bdr);margin:12px 0}
+.footer{padding:18px;font-size:11px;color:var(--tx3);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;border-top:1px solid var(--bdr);margin-top:8px}
+
+/* ── CHART SECTION LABEL ── */
+.clabel{font-size:10px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+
+/* ═══════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════ */
+@media(max-width:1100px){
+  .g3{grid-template-columns:1fr 1fr}
+  .g4,.kg-44{grid-template-columns:repeat(2,1fr)}
+  .hmg{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:840px){
+  :root{--sb:0px}
+  body{grid-template-columns:1fr}
+  .sidebar{display:none}
+  .topbar-wrap{grid-column:1;padding:10px 12px 0}
+  .content{grid-column:1;padding:12px 12px 24px}
+  .g2,.g3,.g21,.g12{grid-template-columns:1fr}
+  .g4,.kg-44{grid-template-columns:repeat(2,1fr)}
+  .kg-auto{grid-template-columns:repeat(2,1fr)}
+  .hmg{grid-template-columns:repeat(2,1fr)}
+  .wfl{width:92px}.fnl{width:100px}
+  .pt{font-size:20px}
+  .tn{padding:5px 10px;font-size:11.5px}
+  .tb-badge.hide-md{display:none}
+}
+@media(max-width:540px){
+  .topbar{padding:4px 4px 4px 12px;height:46px;gap:4px;border-radius:14px}
+  .tb-name,.tb-sep{display:none}
+  .tb-badge{display:none!important}
+  .live{display:none}
+  .kg-44,.kg-auto,.g4{grid-template-columns:1fr 1fr}
+  .tb-nav{gap:1px}
+  .tn{padding:5px 8px;font-size:11px}
+  .pt{font-size:18px}
+  .wfl{width:80px;font-size:10px}
+  .fnl{width:88px;font-size:10px}
+  .hmg{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sb-logo"><svg viewBox="0 0 24 24"><path d="M12 3C9 3 7 5.5 7 8c0 2.1 1 3.9 2.7 4.9C7.8 14 6 16.3 6 19h2.2c0-2.1 1.7-3.8 3.8-3.8S15.8 16.9 15.8 19H18c0-2.7-1.8-5-4.2-6.1C15.5 11.8 16.5 10 16.5 8c0-2.8-2-5-4.5-5zm0 9.1c-2 0-3.5-1.5-3.5-3.1S10 5.8 12 5.8s3.5 1.5 3.5 3.2-1.5 3.1-3.5 3.1z"/></svg></div>
+  <nav class="sb-nav">
+    <button class="sb-btn active" data-tab="overview"   data-tip="Visão geral"        ><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></button>
+    <button class="sb-btn"        data-tab="financeiro" data-tip="Projeção financeira"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></button>
+    <button class="sb-btn"        data-tab="adocao"     data-tip="Funil de adoção"    ><svg viewBox="0 0 24 24"><path d="M3 4h18l-7 8v6l-4 2V12L3 4z"/></svg></button>
+    <button class="sb-btn"        data-tab="inadimplencia" data-tip="Inadimplência"   ><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M18 9l-5 5-4-4-3 3"/></svg></button>
+    <button class="sb-btn"        data-tab="score"      data-tip="Score IA & crédito" ><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg></button>
+    <button class="sb-btn"        data-tab="regional"   data-tip="Análise regional"   ><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg></button>
+    <div class="sb-sep"></div>
+    <button class="sb-btn"        data-tab="dados"      data-tip="Dados & decisões"   ><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg></button>
+    <button class="sb-btn"        data-tab="riscos"     data-tip="Riscos de dados"    ><svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></button>
+    <button class="sb-btn"        data-tab="insights"   data-tip="Insights"           ><svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 00-4 12.74V17h8v-2.26A7 7 0 0012 2z"/><line x1="9" y1="21" x2="15" y2="21"/><line x1="9" y1="19" x2="15" y2="19"/></svg></button>
+  </nav>
+  <div class="sb-avatar">4G</div>
+</aside>
+
+<!-- TOPBAR -->
+<div class="topbar-wrap">
+  <div class="topbar">
+    <div class="tb-brand">
+      <div class="tb-icon"><svg viewBox="0 0 24 24"><path d="M12 3C9 3 7 5.5 7 8c0 2.1 1 3.9 2.7 4.9C7.8 14 6 16.3 6 19h2.2c0-2.1 1.7-3.8 3.8-3.8S15.8 16.9 15.8 19H18c0-2.7-1.8-5-4.2-6.1C15.5 11.8 16.5 10 16.5 8c0-2.8-2-5-4.5-5zm0 9.1c-2 0-3.5-1.5-3.5-3.1S10 5.8 12 5.8s3.5 1.5 3.5 3.2-1.5 3.1-3.5 3.1z"/></svg></div>
+      <span class="tb-name">Natura · Ecossistema 360</span>
+    </div>
+    <div class="tb-sep"></div>
+    <nav class="tb-nav">
+      <button class="tn active" data-tab="overview"      >Visão geral</button>
+      <button class="tn"        data-tab="financeiro"    >Projeção</button>
+      <button class="tn"        data-tab="adocao"        >Adoção</button>
+      <button class="tn"        data-tab="inadimplencia" >Inadimplência</button>
+      <button class="tn"        data-tab="score"         >Score IA</button>
+      <button class="tn"        data-tab="regional"      >Regional</button>
+      <button class="tn"        data-tab="dados"         >Dados</button>
+      <button class="tn"        data-tab="riscos"        >Riscos</button>
+      <button class="tn"        data-tab="insights"      >Insights</button>
+    </nav>
+    <div class="tb-right">
+      <div class="live"></div>
+      <span class="tb-badge tbr hide-md">PDD 12,1%</span>
+      <span class="tb-badge tbg">R$966M</span>
+      <span class="tb-badge tbo hide-md">GUT 125</span>
+    </div>
+  </div>
+</div>
+
+<div id="tt"><div id="tt-ar"></div><div id="tt-title"></div><div id="tt-body"></div><div id="tt-src"></div></div>
+
+<div class="content">
+
+<!-- ══════ TAB 1: VISÃO GERAL ══════ -->
+<div id="tab-overview" class="section active">
+  <div class="ph"><div class="ph-row"><div><div class="pt">Visão geral do ecossistema</div><div class="ps">Estado atual, oportunidade e impacto financeiro consolidado · mai/2026</div></div></div></div>
+
+  <!-- Linha 1: 4 KPIs -->
+  <div class="kg kg-44" style="margin-bottom:12px">
+    <div class="kc kc-r"><div class="kt"><div class="kl">PDD atual</div><button class="info-btn" data-title="Provisão para Devedores Duvidosos" data-body="% do faturamento que a Natura estima não receber. Calculado sobre R$20Bi de receita bruta. Cada ponto percentual = ~R$200M de perda." data-src="RI Natura 2024">i</button></div><div class="kv r">12,1%</div><div class="kd d">▼ R$726M perdidos/ano</div><div class="kb"><div class="kbf" style="width:12%;background:var(--r5)"></div></div></div>
+    <div class="kc kc-g"><div class="kt"><div class="kl">Margem incremental</div><button class="info-btn" data-title="Incremento total de margem líquida" data-body="PDD recuperado R$726M + antecipação R$150M + MDR R$90M = R$966M. Pressupõe 30% do faturamento migrado." data-src="Simulação interna 4GETT">i</button></div><div class="kv g">R$966M</div><div class="kd u">▲ 24× ROI sobre R$40M</div><div class="kb"><div class="kbf" style="width:85%;background:var(--n6)"></div></div></div>
+    <div class="kc kc-o"><div class="kt"><div class="kl">Adoção Emana Pay</div><button class="info-btn" data-title="Taxa de adoção do Emana Pay" data-body="36% da base de 3,1M consultoras com conta ativa (≈1,1M). +50% YoY. Usuárias: +10% produtividade, +20% ticket, −30% PDD." data-src="Sensedia Mobile Time 2024">i</button></div><div class="kv o">36%</div><div class="kd u">▲ +50% YoY · 1,1M contas</div><div class="kb"><div class="kbf" style="width:36%;background:var(--g4)"></div></div></div>
+    <div class="kc kc-r"><div class="kt"><div class="kl">Boletos físicos/ano</div><button class="info-btn" data-title="Volume de boletos anual" data-body="~60M boletos/ano. Risco 100% suportado pela Natura. Tap on Phone transfere esse risco para a operadora — liquidação garantida D+1." data-src="Análise operacional Natura 2024">i</button></div><div class="kv r">60M</div><div class="kd d">▼ 100% de risco na Natura</div><div class="kb"><div class="kbf" style="width:90%;background:var(--r5)"></div></div></div>
+  </div>
+
+  <!-- Linha 2: 4 KPIs -->
+  <div class="kg kg-44">
+    <div class="kc kc-r"><div class="kt"><div class="kl">Transações anônimas</div><button class="info-btn" data-title="Vendas sem CPF identificado" data-body="~90% das transações sem CPF. R$23Bi sem dado primário — impossibilitando personalização e score de crédito." data-src="Relatório Integrado Natura 2024">i</button></div><div class="kv r">~90%</div><div class="kd d">▼ sem CPF · sem dado primário</div><div class="kb"><div class="kbf" style="width:90%;background:var(--r5)"></div></div></div>
+    <div class="kc kc-g"><div class="kt"><div class="kl">Payback estimado</div><button class="info-btn" data-title="Tempo de retorno do investimento" data-body="R$40M investidos. Margem incremental mensal de ~R$80M após produção plena (set/2026). Payback em 8 meses após go-live." data-src="Simulação financeira 4GETT">i</button></div><div class="kv g">8 meses</div><div class="kd u">▲ após go-live pleno</div><div class="kb"><div class="kbf" style="width:67%;background:var(--n6)"></div></div></div>
+    <div class="kc kc-g"><div class="kt"><div class="kl">Tap on Phone BR 2025</div><button class="info-btn" data-title="Validação de mercado NFC" data-body="R$78Bi movimentados em 2025 (+241% YoY). Valida maturidade tecnológica do NFC como pagamento de massa." data-src="ABECS 2025">i</button></div><div class="kv g">R$78Bi</div><div class="kd u">▲ +241% YoY · mercado validado</div><div class="kb"><div class="kbf" style="width:78%;background:var(--n6)"></div></div></div>
+    <div class="kc kc-o"><div class="kt"><div class="kl">iP&L atual → 2030</div><button class="info-btn" data-title="Impacto Positivo & Lucro" data-body="R$2,50 de retorno social por R$1 de receita hoje. Meta R$4,00 até 2030 — incluindo emancipação financeira das consultoras." data-src="Relatório Integrado Natura 2024">i</button></div><div class="kv o">R$2,50→R$4</div><div class="kd u">▲ meta ESG até 2030</div><div class="kb"><div class="kbf" style="width:62%;background:var(--g4)"></div></div></div>
+  </div>
+
+  <div class="card mb">
+    <div class="ch"><div><div class="ct">Cascata de valor — decomposição do R$966M</div><div class="cs">Contribuição de cada alavanca sobre R$6Bi migrados</div></div><button class="info-btn" data-title="Cascata de valor" data-body="30% do faturamento (R$6Bi) migra para o digital. (1) PDD 12,1% evitado; (2) antecipação 50% vol a 5% spread; (3) MDR líquido 1,5%." data-src="Simulação financeira 4GETT">i</button></div>
+    <div class="wfr"><div class="wfl">Faturamento base</div><div class="wft"><div class="wff" style="width:100%;background:rgba(29,158,117,.15);color:var(--n7)">R$20 Bilhões (100%)</div></div></div>
+    <div class="wfr"><div class="wfl">Volume Aproxima Aê</div><div class="wft"><div class="wff" style="width:30%;background:rgba(29,158,117,.25);color:var(--n7)">R$6Bi (30%)</div></div></div>
+    <div class="wfr"><div class="wfl">① PDD recuperado</div><div class="wft"><div class="wff" style="width:75%;background:var(--n6);color:#fff">R$726M</div></div></div>
+    <div class="wfr"><div class="wfl">② Antecipação 5%</div><div class="wft"><div class="wff" style="width:15.5%;background:var(--g4);color:#fff">R$150M</div></div></div>
+    <div class="wfr"><div class="wfl">③ MDR líquido 1,5%</div><div class="wft"><div class="wff" style="width:9.3%;background:var(--g5);color:#fff">R$90M</div></div></div>
+    <div class="wfr" style="margin-top:4px"><div class="wfl" style="color:var(--n6);font-weight:600">Total incremental</div><div class="wft" style="border:1.5px solid var(--n6)"><div class="wff" style="width:100%;background:var(--n6);color:#fff;font-weight:600">R$966M de margem líquida</div></div></div>
+  </div>
+
+  <div class="g3">
+    <div class="card">
+      <div class="ch"><div><div class="ct">Boleto vs. Aproxima Aê</div></div><button class="info-btn" data-title="Comparativo boleto vs. Aproxima Aê" data-body="4 fatores: risco zero, receita nova, velocidade D+1 e parcelamento. O risco de calote (100% Natura no boleto) passa a 0% no modelo digital." data-src="Análise estratégica 4GETT">i</button></div>
+      <div class="cw" style="height:182px"><canvas id="chartCompar"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="ch"><div><div class="ct">PDD por canal</div></div><button class="info-btn" data-title="Distribuição do PDD por canal" data-body="89% da inadimplência gerada por boletos. Emana Pay: apenas 8% do PDD — evidência de que a digitalização reduz drasticamente o risco." data-src="Estimativa operacional Natura 2024">i</button></div>
+      <div class="cw" style="height:140px"><canvas id="chartPDD"></canvas></div>
+      <div class="leg" style="justify-content:center;margin-top:8px">
+        <div class="li"><div class="lsq" style="background:var(--r5)"></div><span>Boleto 89%</span></div>
+        <div class="li"><div class="lsq" style="background:var(--n6)"></div><span>Emana Pay 8%</span></div>
+        <div class="li"><div class="lsq" style="background:var(--tx3)"></div><span>Outros 3%</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ch"><div><div class="ct">Mercado BPC LatAm</div></div><button class="info-btn" data-title="Crescimento BPC LatAm" data-body="+18% Q1/2025, CAGR 6,2% até 2028. Janela para digitalização acelerada antes da concorrência." data-src="Euromonitor 2025 · NielsenIQ 2025">i</button></div>
+      <div class="cw" style="height:182px"><canvas id="chartMercado"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ TAB 2: FINANCEIRO ══════ -->
+<div id="tab-financeiro" class="section">
+  <div class="ph"><div class="ph-row"><div><div class="pt">Projeção financeira 2026–2030</div><div class="ps">Simulação de receitas, PDD evitado e margem acumulada por fase</div></div></div></div>
+  <div class="kg kg-auto">
+    <div class="kc kc-o"><div class="kt"><div class="kl">CAPEX total</div><button class="info-btn" data-title="Investimento total" data-body="R$40M cobre Super App, SDK NFC, cloud, treinamento e compliance. 1% do caixa de R$4Bi pós-venda Avon." data-src="Plano financeiro 4GETT">i</button></div><div class="kv o">R$40M</div><div class="kd m">1% do caixa de R$4Bi</div></div>
+    <div class="kc kc-g"><div class="kt"><div class="kl">Margem acumulada 2027</div><button class="info-btn" data-title="Acumulado até dez/2027" data-body="Produção plena out/2026 + expansão LatAm. ~R$1,8Bi acumulados incluindo crescimento orgânico +20% ticket." data-src="Projeção 4GETT">i</button></div><div class="kv g">~R$1,8Bi</div><div class="kd u">▲ acumulado até dez/2027</div></div>
+    <div class="kc kc-n"><div class="kt"><div class="kl">MDR receita nova</div><button class="info-btn" data-title="Receita de MDR" data-body="1,5% sobre R$6Bi = R$90M/ano. Com 100% de migração (R$20Bi): potencial de R$300M/ano." data-src="ABECS 2025">i</button></div><div class="kv">R$90M</div><div class="kd m">→ R$300M na migração plena</div></div>
+    <div class="kc kc-g"><div class="kt"><div class="kl">Acurácia score IA</div><button class="info-btn" data-title="Meta de acurácia ML" data-body="Shadow testing 4 meses. >85% → ativa bloqueio gradual. Abaixo → extensão do teste." data-src="Benchmark McKinsey · CDO Natura">i</button></div><div class="kv g">&gt;85%</div><div class="kd u">▲ target shadow testing</div></div>
+  </div>
+
+  <div class="card mb">
+    <div class="ch"><div><div class="ct">Simulador — variação da taxa de migração</div><div class="cs">% de faturamento migrado de boleto para o Aproxima Aê</div></div><button class="info-btn" data-title="Simulador de sensibilidade" data-body="Meta conservadora: 30% (R$6Bi) até dez/2026. 100% de migração (2027/28) = R$3,2Bi." data-src="Modelo financeiro 4GETT">i</button></div>
+    <div class="slw"><span class="sll">% migrado:</span><input type="range" id="simSlider" min="5" max="100" value="30" step="5"><span class="slv" id="simPct">30%</span></div>
+    <div class="g4" style="margin-bottom:0">
+      <div class="kc kc-g"><div class="kl">Volume digital (R$Bi)</div><div class="kv g" id="simVol">6,0</div><div class="kd m">sobre R$20Bi</div></div>
+      <div class="kc kc-g"><div class="kl">PDD evitado (R$M)</div><div class="kv g" id="simPDD">726</div><div class="kd m">12,1% × 30% bloqueio</div></div>
+      <div class="kc kc-n"><div class="kl">Antecipação (R$M)</div><div class="kv" id="simAnt">150</div><div class="kd m">5% spread × 50% vol.</div></div>
+      <div class="kc kc-o"><div class="kl">MDR líquido (R$M)</div><div class="kv o" id="simMDR">90</div><div class="kd m">1,5% vol. digital</div></div>
+    </div>
+    <div style="margin-top:10px;padding:12px 16px;background:var(--n1);border-radius:var(--rad-sm);border:1px solid var(--n2);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+      <span style="font-size:13px;color:var(--tx2)">Total incremental (R$M)</span>
+      <span style="font-family:'DM Sans',sans-serif;font-size:24px;font-weight:700;color:var(--n6);letter-spacing:-.5px" id="simTotal">966</span>
+      <span style="font-size:13px;color:var(--n6);font-weight:600" id="simROI">▲ ROI 24×</span>
+    </div>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="ch"><div><div class="ct">Margem acumulada 2026–2030</div><div class="cs">+15%/ano crescimento orgânico de adoção</div></div><button class="info-btn" data-title="Projeção de margem acumulada" data-body="H1/26 = lançamento; H2/26 = parcial; 2027 = plena LatAm; 2028–30 = ecossistema maduro." data-src="Projeção 4GETT">i</button></div>
+      <div class="cw" style="height:230px"><canvas id="chartMargem"></canvas></div>
+      <div class="leg"><div class="li"><div class="lsq" style="background:rgba(29,158,117,.4)"></div><span>Margem anual</span></div><div class="li"><div class="lsq" style="background:var(--n6)"></div><span>Acumulado</span></div></div>
+    </div>
+    <div class="card">
+      <div class="ch"><div><div class="ct">Composição por fonte (2026–2030)</div><div class="cs">Fontes de receita empilhadas por ano</div></div><button class="info-btn" data-title="Fontes de receita" data-body="100% de migração: PDD R$726M + antecipação R$500M + MDR R$300M = R$1,5Bi/ano." data-src="Projeção 4GETT">i</button></div>
+      <div class="cw" style="height:230px"><canvas id="chartFontes"></canvas></div>
+      <div class="leg"><div class="li"><div class="lsq" style="background:var(--n6)"></div><span>PDD evitado</span></div><div class="li"><div class="lsq" style="background:var(--g4)"></div><span>Antecipação</span></div><div class="li"><div class="lsq" style="background:var(--g5)"></div><span>MDR líquido</span></div></div>
+    </div>
+  </div>
+
+  <div class="card mb">
+    <div class="ch"><div><div class="ct">Roadmap financeiro por fase</div></div><button class="info-btn" data-title="Fases do ecossistema" data-body="R$40M investidos em H1/2026. Receitas desde H2/2026 e pico em 2027." data-src="Roadmap 4GETT">i</button></div>
+    <div class="dtw"><table class="dt"><thead><tr><th>Fase</th><th>Período</th><th>Marco</th><th>Invest.</th><th>Receita est.</th><th>Status</th></tr></thead><tbody>
+      <tr><td>① Lançamento Aproxima Aê</td><td>Mar–Jun/2026</td><td>30% migrado · Gate CPF</td><td>R$18M</td><td>R$120M/sem.</td><td><span class="tag to">Em progresso</span></td></tr>
+      <tr><td>② Perfil 360° ativo</td><td>Abr–Set/2026</td><td>100% CPF · shadow testing</td><td>R$12M</td><td>R$210M/sem.</td><td><span class="tag to">Planejado</span></td></tr>
+      <tr><td>③ Score IA — produção plena</td><td>Ago/2026–2027</td><td>Bloqueio preditivo</td><td>R$10M</td><td>R$483M/sem.</td><td><span class="tag tx">Planejado</span></td></tr>
+      <tr><td>④ Ecossistema maduro LatAm</td><td>2027–2030</td><td>ARG+MEX · Data Lake</td><td>—</td><td>R$1,1Bi+/ano</td><td><span class="tag tx">Futuro</span></td></tr>
+    </tbody></table></div>
+  </div>
+</div>
+
+<!-- ══════ TAB 3: ADOÇÃO ══════ -->
+<div id="tab-adocao" class="section">
+  <div class="ph"><div class="ph-row"><div><div class="pt">Funil de adoção digital</div><div class="ps">Da base total de consultoras até o CPF capturado</div></div></div></div>
+  <div class="g21">
+    <div class="card">
+      <div class="ch"><div><div class="ct">Funil — base 3,1M consultoras LatAm</div><div class="cs">Barreiras superadas pelo Programa Digital 360</div></div><button class="info-btn" data-title="Funil de digitalização" data-body="Maior queda: App instalado (55%) → Emana Pay ativo (36%). Gap Aproxima Aê usado (20%) vs. CPF (10%) = oportunidade central." data-src="Sensedia 2024 · dados internos Natura">i</button></div>
+      <div class="fnr"><div class="fnl">Base total LatAm</div><div class="fnt"><div class="fnf" style="width:100%;background:var(--n6);color:#fff">3,1M (100%)</div></div></div>
+      <div class="fnr"><div class="fnl">Com smartphone</div><div class="fnt"><div class="fnf" style="width:85%;background:rgba(29,158,117,.65);color:#fff">2,6M (85%)</div></div></div>
+      <div class="fnr"><div class="fnl">App instalado</div><div class="fnt"><div class="fnf" style="width:55%;background:rgba(29,158,117,.45);color:var(--n7)">1,7M (55%)</div></div></div>
+      <div class="fnr"><div class="fnl">Emana Pay ativo</div><div class="fnt"><div class="fnf" style="width:36%;background:var(--g4);color:#fff">1,1M (36%) ✓</div></div></div>
+      <div class="fnr"><div class="fnl">Aproxima Aê usado</div><div class="fnt"><div class="fnf" style="width:20%;background:var(--g5);color:#fff">620k (20%)</div></div></div>
+      <div class="fnr"><div class="fnl">CPF capturado</div><div class="fnt"><div class="fnf" style="width:10%;background:var(--r5);color:#fff">310k (10%)</div></div></div>
+      <div style="margin-top:12px;padding:11px 14px;background:var(--n1);border-radius:var(--rad-sm);border:1px solid var(--n2)"><div style="font-size:12px;color:var(--n7);font-weight:600;margin-bottom:3px">Oportunidade não capturada</div><div style="font-size:12px;color:var(--tx2)">2,5M consultoras fora do ecossistema = potencial <strong style="color:var(--n6)">+R$700M</strong> na adoção plena.</div></div>
+    </div>
+    <div class="card">
+      <div class="ch"><div class="ct">Performance digital vs. analógico</div><button class="info-btn" data-title="Ganhos das consultoras digitais" data-body="Dados reais das 1,1M com Emana Pay ativo. LTV +45% reflete efeito composto de mais vendas, ticket e menos inadimplência." data-src="mercadoeconsumo.com.br 2024 · Sensedia">i</button></div>
+      <div class="prr"><div class="prl"><span>Produtividade</span><span style="color:var(--n6)">+10%</span></div><div class="prt"><div class="prf" style="width:10%;background:var(--n6)"></div></div></div>
+      <div class="prr"><div class="prl"><span>Ticket médio</span><span style="color:var(--n6)">+20%</span></div><div class="prt"><div class="prf" style="width:20%;background:var(--n5)"></div></div></div>
+      <div class="prr"><div class="prl"><span>Redução PDD</span><span style="color:var(--n6)">-30%</span></div><div class="prt"><div class="prf" style="width:30%;background:var(--n4)"></div></div></div>
+      <div class="prr"><div class="prl"><span>LTV estimado</span><span style="color:var(--n6)">+45%</span></div><div class="prt"><div class="prf" style="width:45%;background:var(--n3)"></div></div></div>
+      <div class="divd"></div>
+      <div style="font-size:11px;color:var(--tx3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;font-weight:600">Crescimento YoY Emana Pay</div>
+      <div style="font-family:'DM Sans',sans-serif;font-size:34px;font-weight:700;color:var(--n6);letter-spacing:-.5px">+50%</div>
+      <div style="font-size:12px;color:var(--tx3)">730k (2023) → 1,1M (2024)</div>
+    </div>
+  </div>
+
+  <!-- NOVO: Gráfico adoção acumulado + visão gradual -->
+  <div class="card mb">
+    <div class="ch"><div><div class="ct">Adoção do ecossistema — acumulado e progressão mensal</div><div class="cs">Volume absoluto de consultoras digitais · projeção vs. realizado · mai/2026–dez/2027</div></div><button class="info-btn" data-title="Curva de adoção acumulada" data-body="Linha cheia = realizado (dado real até mai/2026). Linha tracejada = projeção meta. Barras = crescimento incremental mensal (novas ativações). A área verde representa a base acumulada ativa." data-src="Sensedia 2024 · projeção 4GETT">i</button></div>
+    <div class="cw" style="height:280px"><canvas id="chartAdocaoAcum"></canvas></div>
+    <div class="leg">
+      <div class="li"><div class="lsq" style="background:var(--n6)"></div><span>Realizado (acumulado)</span></div>
+      <div class="li"><div class="lsq" style="background:rgba(29,158,117,.4);border:1px dashed var(--n6)"></div><span>Projeção meta</span></div>
+      <div class="li"><div class="lsq" style="background:var(--g4)"></div><span>Novas ativações mensais</span></div>
+    </div>
+  </div>
+
+  <div class="card mb">
+    <div class="ch"><div><div class="ct">3 alavancas simultâneas — projeção 2026–2027</div><div class="cs">Adoção % · CPF identificados · Redução de PDD</div></div><button class="info-btn" data-title="Projeção das 3 alavancas" data-body="Interdependentes: mais adoção → mais CPFs → score mais preciso → menos PDD → mais crédito → mais vendas. Ciclo virtuoso fecha em set/2026." data-src="Projeção técnica 4GETT">i</button></div>
+    <div class="cw" style="height:240px"><canvas id="chartAdocao"></canvas></div>
+    <div class="leg"><div class="li"><div class="lsq" style="background:var(--n6)"></div><span>Adoção Emana Pay %</span></div><div class="li"><div class="lsq" style="background:var(--g4)"></div><span>CPF identificados %</span></div><div class="li"><div class="lsq" style="background:var(--r5)"></div><span>PDD % (reduzindo)</span></div></div>
+  </div>
+</div>
+
+<!-- ══════ TAB 4: INADIMPLÊNCIA (NOVO) ══════ -->
+<div id="tab-inadimplencia" class="section">
+  <div class="ph"><div class="ph-row"><div><div class="pt">Inadimplência — Emana Pay vs. Boleto</div><div class="ps">Evolução do PDD por canal, projeção vs. realizado e acumulado de perdas evitadas</div></div></div></div>
+
+  <div class="kg kg-auto">
+    <div class="kc kc-r"><div class="kt"><div class="kl">PDD Boleto atual</div><button class="info-btn" data-title="Inadimplência via boleto" data-body="12,1% de PDD no canal boleto — 89% do total de perdas. Sem dado de CPF, é impossível prever inadimplência antes da venda." data-src="RI Natura 2024">i</button></div><div class="kv r">12,1%</div><div class="kd d">▼ R$726M/ano em perdas</div><div class="kb"><div class="kbf" style="width:100%;background:var(--r5)"></div></div></div>
+    <div class="kc kc-g"><div class="kt"><div class="kl">PDD Emana Pay atual</div><button class="info-btn" data-title="Inadimplência via Emana Pay" data-body="Consultoras com Emana Pay ativo têm −30% de PDD vs. boleto. Score + liquidação D+1 eliminam o risco de calote." data-src="mercadoeconsumo.com.br 2024">i</button></div><div class="kv g">4,3%</div><div class="kd u">▼ −65% vs. boleto</div><div class="kb"><div class="kbf" style="width:35%;background:var(--n6)"></div></div></div>
+    <div class="kc kc-g"><div class="kt"><div class="kl">Meta PDD 2027</div><button class="info-btn" data-title="Meta de inadimplência 2027" data-body="Com score IA maduro e 80% de migração digital, o PDD consolidado cai de 12,1% para 8,5% — R$290M a menos em perdas anuais." data-src="Projeção 4GETT">i</button></div><div class="kv g">8,5%</div><div class="kd u">▲ meta consolidada 2027</div><div class="kb"><div class="kbf" style="width:70%;background:var(--n5)"></div></div></div>
+    <div class="kc kc-o"><div class="kt"><div class="kl">PDD evitado acum. 2027</div><button class="info-btn" data-title="Acumulado de PDD evitado" data-body="Soma do PDD evitado mês a mês de mai/2026 a dez/2027 com migração gradual. Cresce conforme mais consultoras aderem ao Aproxima Aê." data-src="Simulação financeira 4GETT">i</button></div><div class="kv o">R$1,1Bi</div><div class="kd u">▲ acumulado mai/26–dez/27</div><div class="kb"><div class="kbf" style="width:85%;background:var(--g4)"></div></div></div>
+  </div>
+
+  <!-- Gráfico principal: curva de inadimplência por canal -->
+  <div class="card mb">
+    <div class="ch"><div><div class="ct">Curva de inadimplência — Emana Pay vs. Boleto</div><div class="cs">% PDD mensal por canal · realizado até mai/2026 · projeção até dez/2027</div></div><button class="info-btn" data-title="Evolução do PDD por canal" data-body="Boleto: PDD estável em ~12% pois não tem dado de CPF nem score preditivo. Emana Pay: PDD já começa menor (4,3%) e cai conforme o score IA matura após mai/2026. A área entre as curvas = oportunidade capturada." data-src="RI Natura 2024 · projeção 4GETT">i</button></div>
+    <div class="cw" style="height:300px"><canvas id="chartInadCurva"></canvas></div>
+    <div class="leg">
+      <div class="li"><div class="lsq" style="background:var(--r5)"></div><span>PDD Boleto (realizado)</span></div>
+      <div class="li"><div class="lsq" style="background:var(--n6)"></div><span>PDD Emana Pay (realizado)</span></div>
+      <div class="li"><div class="lsq" style="background:rgba(29,158,117,.4)"></div><span>Projeção Emana Pay (meta)</span></div>
+      <div class="li" style="margin-left:4px"><div style="width:10px;height:2px;background:var(--r5);opacity:.4;border-radius:1px"></div><span style="margin-left:5px">Área = perdas evitadas</span></div>
+    </div>
+  </div>
+
+  <div class="g2">
+    <!-- Gráfico PDD acumulado: projeção vs. realizado -->
+    <div class="card">
+      <div class="ch"><div><div class="ct">PDD acumulado — projeção vs. realizado</div><div class="cs">R$M evitados mês a mês · mai/2026–dez/2027</div></div><button class="info-btn" data-title="Acompanhamento de PDD evitado" data-body="Barras = PDD evitado realizado (consultoras já migradas). Linha = meta de projeção. Desvio positivo = melhor que o planejado. Aceleração esperada após jul/2026 com score IA em shadow testing." data-src="Simulação financeira 4GETT">i</button></div>
+      <div class="cw" style="height:260px"><canvas id="chartPDDAcum"></canvas></div>
+      <div class="leg">
+        <div class="li"><div class="lsq" style="background:var(--n6)"></div><span>Realizado (R$M)</span></div>
+        <div class="li"><div class="lsq" style="background:rgba(29,158,117,.3)"></div><span>Projeção meta (R$M)</span></div>
+      </div>
+    </div>
+
+    <!-- Barras mensais de redução -->
+    <div class="card">
+      <div class="ch"><div><div class="ct">Redução mensal do PDD consolidado</div><div class="cs">Queda gradual mês a mês · pontos percentuais</div></div><button class="info-btn" data-title="Queda gradual do PDD" data-body="Cada mês de migração digital reduz o PDD consolidado. A queda se acelera em ago/2026 (shadow testing concluído) e em mar/2027 (score IA em produção plena na Argentina)." data-src="Projeção 4GETT">i</button></div>
+      <div class="cw" style="height:260px"><canvas id="chartPDDMes"></canvas></div>
+      <div class="leg">
+        <div class="li"><div class="lsq" style="background:var(--n6)"></div><span>PDD consolidado % (realizado)</span></div>
+        <div class="li"><div class="lsq" style="background:var(--r5);opacity:.5"></div><span>Meta máxima aceitável</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ TAB 5: SCORE IA ══════ -->
+<div id="tab-score" class="section">
+  <div class="ph"><div class="ph-row"><div><div class="pt">Score IA & blindagem preditiva de crédito</div><div class="ps">Modelo ML que protege R$726M anuais — shadow testing e ativação gradual</div></div></div></div>
+
+  <!-- Score + Tabela lado a lado, sem scroll -->
+  <div class="g2">
+    <div class="card">
+      <div class="ch"><div><div class="ct">Acurácia do modelo — shadow testing</div><div class="cs">4 meses sem bloquear transações</div></div><button class="info-btn" data-title="Shadow testing do score" data-body="IA calcula o score mas NÃO bloqueia a venda. Compara previsão com inadimplência real. >85% → ativa bloqueio gradual: C/D → Pix; A+ → microcrédito." data-src="CDO Natura · McKinsey">i</button></div>
+      <!-- height fixo, canvas com maxHeight garantido -->
+      <div class="cw" style="height:200px"><canvas id="chartScore"></canvas></div>
+      <div class="leg"><div class="li"><div class="lsq" style="background:var(--n6)"></div><span>Acurácia modelo ML</span></div><div class="li"><div class="lsq" style="background:var(--r5)"></div><span>Meta mínima 85%</span></div></div>
+    </div>
+    <div class="card">
+      <div class="ch"><div class="ct">Segmentação por perfil de risco</div><button class="info-btn" data-title="Segmentação de crédito" data-body="IA NAT classifica cruzando CPF com Serasa/SPC + histórico Natura. A+ = limite crescente por LTV. C/D = redirecionado para Pix — sem constrangimento." data-src="Especificação técnica Alavanca 3">i</button></div>
+      <div class="dtw"><table class="dt"><thead><tr><th>Perfil</th><th>Score</th><th>Condição</th><th>Limite</th></tr></thead><tbody>
+        <tr><td><span class="tag tg">A+</span></td><td>850–1000</td><td>Cartão até 12×</td><td>Microcrédito crescente por LTV</td></tr>
+        <tr><td><span class="tag tg">A</span></td><td>700–849</td><td>Cartão até 6×</td><td>Limite fixo bimestral</td></tr>
+        <tr><td><span class="tag to">B</span></td><td>500–699</td><td>Débito ou Pix</td><td>Sem parcelamento</td></tr>
+        <tr><td><span class="tag tr">C/D</span></td><td>&lt;500</td><td>Apenas Pix à vista</td><td>Pré-bloqueio ativo</td></tr>
+      </tbody></table></div>
+      <div style="margin-top:12px;padding:11px 14px;background:var(--r1);border-radius:var(--rad-sm);border:1px solid var(--r2)">
+        <div style="font-size:12px;color:var(--r6);font-weight:600;margin-bottom:3px">Inversão de lógica</div>
+        <div style="font-size:12px;color:var(--tx2)">De pós-calote → pré-bloqueio. A IA decide antes da venda — sem constrangimento para a consultora.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card mb">
+    <div class="ch"><div><div class="ct">Impacto no PDD — simulação por cohort (12 meses)</div><div class="cs">Comparativo: grupo controle (boleto) vs. tratado (Aproxima Aê + score IA)</div></div><button class="info-btn" data-title="Redução de PDD por cohort" data-body="A diferença entre as curvas = PDD evitado. >85% acurácia → redução de 30% do PDD no mês 6." data-src="Simulação 4GETT · McKinsey 2024">i</button></div>
+    <!-- height menor para caber sem scroll horizontal -->
+    <div class="cw" style="height:220px"><canvas id="chartCohort"></canvas></div>
+    <div class="leg"><div class="li"><div class="lsq" style="background:var(--r5)"></div><span>Cohort controle (boleto)</span></div><div class="li"><div class="lsq" style="background:var(--n6)"></div><span>Cohort tratado (score IA)</span></div></div>
+  </div>
+</div>
+
+<!-- ══════ TAB 6: REGIONAL ══════ -->
+<div id="tab-regional" class="section">
+  <div class="ph"><div class="ph-row"><div><div class="pt">Análise regional — LatAm</div><div class="ps">Diagnóstico por país, adoção, PDD e prioridade de rollout</div></div></div></div>
+  <div class="card mb">
+    <div class="ch"><div><div class="ct">Heatmap — adoção Emana Pay vs. PDD por país</div></div><button class="info-btn" data-title="Heatmap regional" data-body="Baixa adoção + alto PDD = maior urgência. Argentina: maior PDD (15,4%) e menor adoção (8%), mas instabilidade macro justifica calibrar o modelo no Brasil primeiro." data-src="Análise 4GETT · RI Q3 2025">i</button></div>
+    <div class="hmg">
+      <div class="hmc" style="background:rgba(29,158,117,.08);border-color:rgba(29,158,117,.2)"><div style="font-size:11px;color:var(--tx3);margin-bottom:4px">Brasil</div><div style="font-size:15px;font-weight:600;color:var(--n6)">36% adoção</div><div style="font-size:11px;color:var(--r5);margin-top:2px">PDD 12,1%</div><div style="font-size:11px;color:var(--tx3);margin-top:4px">1,8M consultoras</div><div style="margin-top:7px"><span class="tag tg">H1 2026 — prioritário</span></div></div>
+      <div class="hmc" style="background:rgba(217,64,64,.06);border-color:rgba(217,64,64,.2)"><div style="font-size:11px;color:var(--tx3);margin-bottom:4px">Argentina</div><div style="font-size:15px;font-weight:600;color:var(--r5)">8% adoção</div><div style="font-size:11px;color:var(--r5);margin-top:2px">PDD 15,4%</div><div style="font-size:11px;color:var(--tx3);margin-top:4px">620k consultoras</div><div style="margin-top:7px"><span class="tag to">H2 2026</span></div></div>
+      <div class="hmc" style="background:rgba(239,159,39,.07);border-color:rgba(239,159,39,.2)"><div style="font-size:11px;color:var(--tx3);margin-bottom:4px">México</div><div style="font-size:15px;font-weight:600;color:var(--g4)">6% adoção</div><div style="font-size:11px;color:var(--g5);margin-top:2px">PDD 10,2%</div><div style="font-size:11px;color:var(--tx3);margin-top:4px">420k consultoras</div><div style="margin-top:7px"><span class="tag to">H2 2026</span></div></div>
+      <div class="hmc"><div style="font-size:11px;color:var(--tx3);margin-bottom:4px">Outros LatAm</div><div style="font-size:15px;font-weight:600;color:var(--tx3)">3% adoção</div><div style="font-size:11px;color:var(--tx3);margin-top:2px">PDD 9,5%</div><div style="font-size:11px;color:var(--tx3);margin-top:4px">260k consultoras</div><div style="margin-top:7px"><span class="tag tx">2027</span></div></div>
+    </div>
+  </div>
+  <div class="g2">
+    <div class="card"><div class="ch"><div><div class="ct">PDD por país</div></div><button class="info-btn" data-title="PDD por mercado" data-body="Argentina lidera em PDD relativo (15,4%). Brasil tem menor relativo mas concentra maior volume absoluto — R$726M/ano." data-src="Análise 4GETT · Natura 2024">i</button></div><div class="cw" style="height:200px"><canvas id="chartPDDRegion"></canvas></div></div>
+    <div class="card"><div class="ch"><div><div class="ct">Distribuição de consultoras</div></div><button class="info-btn" data-title="Consultoras por mercado" data-body="Brasil: 58% da base LatAm (1,8M). Cada consultora digitalizada = ~R$3.200/ano de margem adicional." data-src="Relatório Integrado Natura 2024">i</button></div><div class="cw" style="height:170px"><canvas id="chartConsultoras"></canvas></div><div class="leg" style="justify-content:center;margin-top:8px"><div class="li"><div class="lsq" style="background:var(--n6)"></div><span>Brasil 58%</span></div><div class="li"><div class="lsq" style="background:var(--r5)"></div><span>Argentina 20%</span></div><div class="li"><div class="lsq" style="background:var(--g4)"></div><span>México 14%</span></div><div class="li"><div class="lsq" style="background:var(--tx3)"></div><span>Outros 8%</span></div></div></div>
+  </div>
+</div>
+
+<!-- ══════ TAB 7: DADOS ══════ -->
+<div id="tab-dados" class="section">
+  <div class="ph"><div class="ph-row"><div><div class="pt">Dados utilizados & decisões geradas</div><div class="ps">Como cada dado orientou uma escolha estratégica específica</div></div></div></div>
+  <div class="card mb">
+    <div class="ch"><div class="ct">Mapa de dados → decisões</div><button class="info-btn" data-title="Metodologia" data-body="Cada decisão fundamentada em ao menos um dado primário verificável. Rastreabilidade entre evidência, decisão e GUT." data-src="Metodologia 4GETT">i</button></div>
+    <div class="dtw"><table class="dt"><thead><tr><th>Dado</th><th>Valor</th><th>Fonte</th><th>Decisão gerada</th><th>GUT</th></tr></thead><tbody>
+      <tr><td>PDD Natura</td><td style="color:var(--r5);font-weight:600">12,1%</td><td>RI Natura 2024</td><td>Prioridade máxima para score IA e blindagem de crédito</td><td><span class="tag tr">125</span></td></tr>
+      <tr><td>Boletos físicos/ano</td><td>60 milhões</td><td>Operacional interno</td><td>Substituição estrutural pelo Tap on Phone</td><td><span class="tag tr">100</span></td></tr>
+      <tr><td>Transações anônimas</td><td style="color:var(--r5);font-weight:600">~90%</td><td>RI + análise interna</td><td>Gate CPF obrigatório + cupom R$15</td><td><span class="tag tr">100</span></td></tr>
+      <tr><td>Produtividade Emana Pay</td><td style="color:var(--n6);font-weight:600">+10% · +20% · −30%</td><td>mercadoeconsumo 2024</td><td>Base do ROI e metas do Programa Digital 360</td><td><span class="tag tg">validado</span></td></tr>
+      <tr><td>Adoção Emana Pay</td><td>36% · 1,1M · +50% YoY</td><td>Sensedia 2024</td><td>Escalonamento: Brasil → ARG → MEX</td><td><span class="tag tb">baseline</span></td></tr>
+      <tr><td>Tap on Phone Brasil 2025</td><td style="color:var(--n6);font-weight:600">R$78Bi · +241%</td><td>ABECS 2025</td><td>NFC validado — barreira é cultural</td><td><span class="tag tg">mercado ok</span></td></tr>
+      <tr><td>Queda receita Q3/2025</td><td style="color:var(--r5);font-weight:600">−13,1% · R$119M prejuízo</td><td>RI Natura Q3 2025</td><td>H1/2026 como janela crítica de recuperação</td><td><span class="tag tr">125</span></td></tr>
+      <tr><td>Crescimento BPC LatAm</td><td style="color:var(--n6)">+18% Q1/2025</td><td>Euromonitor 2025</td><td>Digitalizar antes da concorrência</td><td><span class="tag tg">favorável</span></td></tr>
+      <tr><td>iP&L atual</td><td>R$2,50/R$1 faturado</td><td>Rel. Integrado 2024</td><td>Meta R$4,00 até 2030 via ecossistema digital</td><td><span class="tag tb">ESG KPI</span></td></tr>
+      <tr><td>Caixa pós-venda Avon</td><td style="color:var(--n6);font-weight:600">R$4Bi disponível</td><td>RI Natura 2025</td><td>1% do caixa (R$40M) financia CAPEX/OPEX</td><td><span class="tag tg">viável</span></td></tr>
+    </tbody></table></div>
+  </div>
+</div>
+
+<!-- ══════ TAB 8: RISCOS ══════ -->
+<div id="tab-riscos" class="section">
+  <div class="ph"><div class="ph-row"><div><div class="pt">Riscos de dados — probabilidade × impacto</div><div class="ps">Mapeamento completo com planos de mitigação</div></div></div></div>
+  <div class="g2">
+    <div class="card"><div class="ch"><div><div class="ct">Matriz probabilidade × impacto</div></div><button class="info-btn" data-title="Matriz de riscos" data-body="Probabilidade (X) × impacto (Y). Bolha = severidade relativa. Quadrante superior direito → mitigação imediata." data-src="4GETT · LGPD + Bacen + PCI-DSS">i</button></div><div class="cw" style="height:225px"><canvas id="chartRiscos"></canvas></div></div>
+    <div class="card">
+      <div class="ch"><div><div class="ct">Resumo por categoria</div></div><button class="info-btn" data-title="Categorias de risco" data-body="3 categorias: regulatório, técnico e cultural. Cada uma com estratégia distinta de mitigação e responsável designado." data-src="Análise de risco 4GETT">i</button></div>
+      <div class="prr" style="margin-top:6px"><div class="prl"><span>Regulatório / legal</span><span style="color:var(--r5)">Alto</span></div><div class="prt"><div class="prf" style="width:75%;background:var(--r5)"></div></div></div>
+      <div class="prr"><div class="prl"><span>Técnico / operacional</span><span style="color:var(--g5)">Médio</span></div><div class="prt"><div class="prf" style="width:50%;background:var(--g5)"></div></div></div>
+      <div class="prr"><div class="prl"><span>Cultural / comportamental</span><span style="color:var(--n6)">Baixo</span></div><div class="prt"><div class="prf" style="width:25%;background:var(--n6)"></div></div></div>
+      <div class="divd"></div>
+      <div style="font-size:11px;color:var(--tx3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;font-weight:600">Compliance ativo</div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px"><span class="tag tb">LGPD Art. 11</span><span class="tag tb">PCI-DSS v4</span><span class="tag tb">Bacen fintech</span><span class="tag tg">AES-256</span><span class="tag tg">TLS 1.3</span><span class="tag tg">DPO designado</span></div>
+    </div>
+  </div>
+  <div class="card mb">
+    <div class="ch"><div><div class="ct">Riscos e mitigações</div></div><button class="info-btn" data-title="Planos de mitigação" data-body="Monitoramento contínuo para riscos altos, trimestral para médios/baixos." data-src="Plano de gestão de riscos 4GETT">i</button></div>
+    <div class="rkr"><div><span class="rkp" style="background:var(--r1);color:var(--r6)">Alto · média</span></div><div><div class="rkd">Violação de dados pessoais (CPF, histórico, perfil 360°)</div><div class="rkm">LGPD opt-in · AES-256 · TLS 1.3 · auditoria trimestral · PCI-DSS · DPO designado</div></div></div>
+    <div class="rkr"><div><span class="rkp" style="background:var(--r1);color:var(--r6)">Alto · média</span></div><div><div class="rkd">Viés discriminatório no score de crédito</div><div class="rkm">Shadow testing 4 meses com análise de equidade · auditoria externa antes do go-live · relatório de fairness trimestral</div></div></div>
+    <div class="rkr"><div><span class="rkp" style="background:var(--g1);color:var(--g6)">Médio · média</span></div><div><div class="rkd">Qualidade de dados — CPFs incorretos ou fraudulentos</div><div class="rkm">API Receita Federal em tempo real + Serasa em &lt;200ms · blacklist · rate limiting por IP</div></div></div>
+    <div class="rkr"><div><span class="rkp" style="background:var(--g1);color:var(--g6)">Médio · baixa</span></div><div><div class="rkd">Concentração tecnológica — cloud e birôs</div><div class="rkm">Multi-cloud com failover · backups em 3 regiões · SLA 99,9%</div></div></div>
+    <div class="rkr"><div><span class="rkp" style="background:var(--g1);color:var(--g6)">Médio · baixa</span></div><div><div class="rkd">Risco regulatório — Bacen / Tap on Phone</div><div class="rkm">Licença IP obtida · monitoramento PLP 152/2025 · equipe jurídica dedicada</div></div></div>
+    <div class="rkr"><div><span class="rkp" style="background:var(--n1);color:var(--n7)">Baixo · baixa</span></div><div><div class="rkd">Resistência cultural à coleta de CPF</div><div class="rkm">Cupom R$15 · opt-in revogável · comunicação de proteção, não controle</div></div></div>
+  </div>
+</div>
+
+<!-- ══════ TAB 9: INSIGHTS ══════ -->
+<div id="tab-insights" class="section">
+  <div class="ph"><div class="ph-row"><div><div class="pt">Insights estratégicos</div><div class="ps">As 5 conclusões-chave que orientaram cada decisão do Ecossistema 360</div></div></div></div>
+  <div class="card mb">
+    <div class="ch"><div><div class="ct">Insights que guiaram a tomada de decisão</div><div class="cs">Cruzamento de dados primários com benchmarks de mercado</div></div><button class="info-btn" data-title="Metodologia de insights" data-body="Cruzamento de dados primários (RI Natura) com mercado (ABECS, Euromonitor, McKinsey). Cada insight = decisão estratégica + KPI." data-src="Análise integrada 4GETT">i</button></div>
+    <div class="insr"><div class="insi" style="background:var(--r1);color:var(--r5)">①</div><div><div style="font-size:13px;font-weight:600;color:var(--n7);margin-bottom:4px">O PDD é uma cirurgia urgente, não um ajuste fino</div><div style="font-size:13px;color:var(--tx2);line-height:1.55">R$726M sangrados/ano — 1,5× o custo total do projeto. Payback em 8 meses. Cada mês de atraso = ~R$60M em PDD não evitado.</div><div style="font-size:11px;color:var(--tx3);margin-top:4px">PDD 12,1% × R$6Bi migrado = R$726M · RI Natura 2024</div></div></div>
+    <div class="insr"><div class="insi" style="background:var(--g1);color:var(--g6)">②</div><div><div style="font-size:13px;font-weight:600;color:var(--n7);margin-bottom:4px">Uma empresa de R$23Bi que não conhece seus próprios clientes</div><div style="font-size:13px;color:var(--tx2);line-height:1.55">90% das transações anônimas. Gate de CPF transforma cada pagamento em dado primário — matéria-prima do score de IA.</div><div style="font-size:11px;color:var(--tx3);margin-top:4px">~90% transações sem CPF · Relatório Integrado Natura 2024</div></div></div>
+    <div class="insr"><div class="insi" style="background:var(--n1);color:var(--n6)">③</div><div><div style="font-size:13px;font-weight:600;color:var(--n7);margin-bottom:4px">A barreira não é tecnológica — é cultural</div><div style="font-size:13px;color:var(--tx2);line-height:1.55">Tap on Phone: R$78Bi em 2025, +241%. Tecnologia madura. O obstáculo é a cultura do boleto — por isso o Programa Digital 360 recebe R$8M, o dobro da infraestrutura de cloud.</div><div style="font-size:11px;color:var(--tx3);margin-top:4px">ABECS 2025</div></div></div>
+    <div class="insr"><div class="insi" style="background:var(--n1);color:var(--n6)">④</div><div><div style="font-size:13px;font-weight:600;color:var(--n7);margin-bottom:4px">As consultoras digitais já provam o modelo — escalar é a decisão</div><div style="font-size:13px;color:var(--tx2);line-height:1.55">1,1M com Emana Pay: +10% produtividade, +20% ticket, −30% PDD (dados reais). Escalar de 36% → 100% multiplica esses ganhos por 2,8× sem nova validação.</div><div style="font-size:11px;color:var(--tx3);margin-top:4px">mercadoeconsumo.com.br 2024 · Sensedia 2024</div></div></div>
+    <div class="insr" style="border-bottom:none"><div class="insi" style="background:var(--r1);color:var(--r5)">⑤</div><div><div style="font-size:13px;font-weight:600;color:var(--n7);margin-bottom:4px">A Argentina é o sinal de alerta — e o motivo para priorizar o Brasil</div><div style="font-size:13px;color:var(--tx2);line-height:1.55">PDD 15,4% e adoção 8%. Inflação >200% dificulta calibrar o score. Calibrar no Brasil primeiro → exportar modelo estável para mercados voláteis.</div><div style="font-size:11px;color:var(--tx3);margin-top:4px">4GETT · RI Q3 2025 · FMI Argentina 2025</div></div></div>
+  </div>
+</div>
+
+<div class="footer">
+  <span>Natura · Ecossistema 360 Aproxima Aê · Visão Analítica · Tech Challenge 2026 · 4GETT</span>
+  <span>FIAP · Pós-graduação · IA para Negócios · Gestão Estratégica e Liderança</span>
+</div>
+</div><!-- /content -->
+
+<script>
+/* ═══════════ TOOLTIP ENGINE ═══════════ */
+(function(){
+  const tt=document.getElementById('tt'),
+        ttT=document.getElementById('tt-title'),
+        ttB=document.getElementById('tt-body'),
+        ttS=document.getElementById('tt-src'),
+        ttAr=document.getElementById('tt-ar');
+  let cur=null,tid=null;
+  function pos(btn){
+    const TW=268,r=btn.getBoundingClientRect(),vw=window.innerWidth,vh=window.innerHeight;
+    tt.style.cssText='display:block;visibility:hidden;position:fixed;z-index:9999;width:'+TW+'px';
+    const TH=tt.offsetHeight; tt.style.visibility='';
+    let L=r.left+r.width/2-TW/2,aL=TW/2;
+    if(L<8){aL-=(8-L);L=8}
+    if(L+TW>vw-8){aL+=(L+TW-(vw-8));L=vw-TW-8}
+    aL=Math.max(10,Math.min(TW-20,aL));
+    let T=r.bottom+10;
+    const flip=T+TH>vh-12;
+    if(flip){T=r.top-TH-10;Object.assign(ttAr.style,{top:'auto',bottom:'-6px',transform:'rotate(225deg)',borderTop:'1px solid rgba(29,158,117,.22)',borderLeft:'1px solid rgba(29,158,117,.22)',borderRight:'none',borderBottom:'none'});}
+    else{Object.assign(ttAr.style,{top:'-6px',bottom:'auto',transform:'rotate(45deg)',borderTop:'none',borderLeft:'none',borderRight:'1px solid rgba(29,158,117,.22)',borderBottom:'1px solid rgba(29,158,117,.22)'});}
+    tt.style.left=Math.max(8,L)+'px'; tt.style.top=Math.max(8,T)+'px'; ttAr.style.left=aL+'px';
+  }
+  function open(btn){
+    clearTimeout(tid); if(cur===btn)return; if(cur)cur.classList.remove('act');
+    ttT.textContent=btn.dataset.title||''; ttB.textContent=btn.dataset.body||'';
+    ttS.textContent=btn.dataset.src||''; ttS.style.display=btn.dataset.src?'':'none';
+    tt.classList.remove('show'); document.body.appendChild(tt);
+    requestAnimationFrame(()=>{pos(btn);tt.classList.add('show')});
+    btn.classList.add('act'); cur=btn;
+  }
+  function close(){if(!cur)return;tt.classList.remove('show');cur.classList.remove('act');cur=null;}
+  document.querySelectorAll('.info-btn').forEach(btn=>{
+    btn.addEventListener('click',e=>{e.stopPropagation();cur===btn?close():open(btn)});
+    btn.addEventListener('mouseenter',()=>{clearTimeout(tid);open(btn)});
+    btn.addEventListener('mouseleave',()=>{tid=setTimeout(()=>{if(cur===btn)close()},220)});
+  });
+  tt.addEventListener('mouseenter',()=>clearTimeout(tid));
+  tt.addEventListener('mouseleave',()=>{tid=setTimeout(close,220)});
+  document.addEventListener('click',e=>{if(cur&&!cur.contains(e.target)&&!tt.contains(e.target))close()});
+  window.addEventListener('scroll',()=>{if(cur)pos(cur)},{passive:true,capture:true});
+  window.addEventListener('resize',()=>{if(cur)pos(cur)},{passive:true});
+})();
+
+/* ═══════════ NAVIGATION ═══════════ */
+const TABS=['overview','financeiro','adocao','inadimplencia','score','regional','dados','riscos','insights'];
+
+function goto(id,sbBtn,tnBtn){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.sb-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tn').forEach(b=>b.classList.remove('active'));
+  const sec=document.getElementById('tab-'+id);
+  if(sec)sec.classList.add('active');
+  const idx=TABS.indexOf(id);
+  (sbBtn||document.querySelectorAll('.sb-btn')[idx])?.classList.add('active');
+  (tnBtn||document.querySelectorAll('.tn')[idx])?.classList.add('active');
+  if(!window.cBuilt){buildCharts();window.cBuilt=true}
+  if(id==='financeiro'&&!window.sBuilt){initSim();window.sBuilt=true}
+}
+document.querySelectorAll('.sb-btn').forEach((btn,i)=>{btn.addEventListener('click',function(){goto(TABS[i],this,null)})});
+document.querySelectorAll('.tn').forEach((btn,i)=>{btn.addEventListener('click',function(){goto(TABS[i],null,this)})});
+
+/* ═══════════ CHARTS ═══════════ */
+const N='#1D9E75',G4='#EF9F27',G5='#B36E10',R='#D94040',GY='#888780';
+const NA='rgba(29,158,117,.35)',RA='rgba(217,64,64,.12)';
+const TC='#95938E',GC='rgba(0,0,0,.05)';
+Chart.defaults.color=TC;
+Chart.defaults.font.family="'DM Sans',sans-serif";
+Chart.defaults.font.size=11;
+
+/* labels compartilhados */
+const LBL_MES=['Mai/26','Jun/26','Jul/26','Ago/26','Set/26','Out/26','Nov/26','Dez/26','Mar/27','Jun/27','Set/27','Dez/27'];
+
+function buildCharts(){
+  /* radar */
+  new Chart('chartCompar',{type:'radar',data:{labels:['Risco zero','Receita nova','Vel. D+1','Parcelamento'],datasets:[{label:'Boleto',data:[0,0,20,30],borderColor:R,backgroundColor:'rgba(217,64,64,.07)',pointBackgroundColor:R,borderWidth:1.5,pointRadius:3},{label:'Aproxima Aê',data:[100,85,100,90],borderColor:N,backgroundColor:'rgba(29,158,117,.1)',pointBackgroundColor:N,borderWidth:1.5,pointRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{r:{min:0,max:100,ticks:{display:false},grid:{color:GC},angleLines:{color:GC},pointLabels:{color:TC,font:{size:10}}}}}});
+
+  /* donut PDD */
+  new Chart('chartPDD',{type:'doughnut',data:{labels:['Boleto','Emana Pay','Outros'],datasets:[{data:[89,8,3],backgroundColor:[R,N,GY],borderWidth:0,hoverOffset:4}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.label+': '+c.parsed+'%'}}}}});
+
+  /* BPC */
+  new Chart('chartMercado',{type:'bar',data:{labels:['2021','2022','2023','2024','2025','2026p'],datasets:[{data:[4,8,12,15,18,11],backgroundColor:[GY,GY,GY,GY,N,'rgba(29,158,117,.35)'],borderRadius:6,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'+'+c.parsed.y+'%'}}},scales:{x:{grid:{display:false},ticks:{color:TC}},y:{grid:{color:GC},ticks:{color:TC,callback:v=>v+'%'}}}}});
+
+  /* margem acumulada */
+  new Chart('chartMargem',{type:'bar',data:{labels:['2026','2027','2028','2029','2030'],datasets:[{type:'bar',label:'Margem anual',data:[420,966,1280,1650,2100],backgroundColor:'rgba(29,158,117,.35)',borderRadius:8,borderSkipped:false,yAxisID:'y'},{type:'line',label:'Acumulado',data:[420,1386,2666,4316,6416],borderColor:N,backgroundColor:'rgba(29,158,117,.06)',fill:true,tension:.4,borderWidth:2,pointRadius:4,pointBackgroundColor:N,yAxisID:'y'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.dataset.label+': R$'+c.parsed.y.toLocaleString('pt-BR')+'M'}}},scales:{x:{grid:{display:false},ticks:{color:TC}},y:{grid:{color:GC},ticks:{color:TC,callback:v=>'R$'+(v/1000).toFixed(1)+'Bi'}}}}});
+
+  /* fontes */
+  new Chart('chartFontes',{type:'bar',data:{labels:['2026','2027','2028','2029','2030'],datasets:[{label:'PDD evitado',data:[250,726,870,970,1000],backgroundColor:N,borderSkipped:false},{label:'Antecipação',data:[110,150,260,450,700],backgroundColor:G4,borderSkipped:false},{label:'MDR líquido',data:[60,90,150,230,400],backgroundColor:G5,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{mode:'index',callbacks:{label:c=>c.dataset.label+': R$'+c.parsed.y+'M'}}},scales:{x:{stacked:true,grid:{display:false},ticks:{color:TC}},y:{stacked:true,grid:{color:GC},ticks:{color:TC,callback:v=>'R$'+v+'M'}}}}});
+
+  /* ── NOVO: adoção acumulada (bar + line) ── */
+  new Chart('chartAdocaoAcum',{type:'bar',data:{
+    labels:LBL_MES,
+    datasets:[
+      {type:'line',label:'Realizado acumulado',data:[1100,1140,1195,1262,1348,1450,1572,1714,1900,2050,2200,2400],borderColor:N,backgroundColor:'rgba(29,158,117,.08)',fill:true,tension:.4,borderWidth:2.5,pointRadius:[5,5,5,5,5,5,5,5,4,4,4,4],pointBackgroundColor:N,order:1},
+      {type:'line',label:'Projeção meta',data:[1100,1150,1210,1290,1400,1540,1700,1900,2100,2280,2480,2700],borderColor:N,backgroundColor:'transparent',fill:false,tension:.4,borderWidth:1.5,borderDash:[6,4],pointRadius:0,order:2},
+      {type:'bar',label:'Novas ativações',data:[50,55,67,86,102,102,122,142,186,150,150,200],backgroundColor:G4,borderRadius:5,order:3}
+    ]
+  },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{mode:'index',callbacks:{label:c=>{
+    if(c.datasetIndex===2)return 'Novas: '+c.parsed.y+'k';
+    if(c.datasetIndex===1)return 'Meta: '+c.parsed.y+'k';
+    return 'Ativadas: '+c.parsed.y+'k';
+  }}}},scales:{x:{grid:{display:false},ticks:{color:TC,maxRotation:35}},y:{grid:{color:GC},ticks:{color:TC,callback:v=>v+'k'}}}}});
+
+  /* 3 alavancas */
+  new Chart('chartAdocao',{type:'line',data:{labels:LBL_MES,datasets:[{label:'Adoção %',data:[36,40,46,52,60,68,75,82,90,96,99,100],borderColor:N,backgroundColor:'rgba(29,158,117,.06)',fill:true,tension:.4,borderWidth:2,pointRadius:3,pointBackgroundColor:N},{label:'CPF %',data:[10,16,24,34,45,57,67,77,88,94,98,100],borderColor:G4,fill:false,tension:.4,borderWidth:2,borderDash:[5,3],pointRadius:3,pointBackgroundColor:G4,pointStyle:'triangle'},{label:'PDD %',data:[12.1,11.9,11.6,11.2,10.7,10.1,9.7,9.3,8.9,8.7,8.6,8.5],borderColor:R,fill:false,tension:.4,borderWidth:1.5,borderDash:[3,3],pointRadius:3,pointBackgroundColor:R,pointStyle:'rect'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.dataset.label+': '+c.parsed.y.toFixed(1)+'%'}}},scales:{x:{grid:{display:false},ticks:{color:TC,maxRotation:35}},y:{grid:{color:GC},ticks:{color:TC,callback:v=>v+'%'}}}}});
+
+  /* ── NOVO: curva de inadimplência por canal ── */
+  new Chart('chartInadCurva',{type:'line',data:{
+    labels:LBL_MES,
+    datasets:[
+      {label:'PDD Boleto',data:[12.1,12.1,12.0,12.1,12.0,12.1,12.0,12.1,12.0,12.1,12.0,12.1],borderColor:R,backgroundColor:'rgba(217,64,64,.06)',fill:true,tension:.2,borderWidth:2.5,pointRadius:4,pointBackgroundColor:R},
+      {label:'PDD Emana Pay (realizado)',data:[4.3,4.2,4.0,3.8,3.6,3.4,3.2,3.0,null,null,null,null],borderColor:N,backgroundColor:'rgba(29,158,117,.08)',fill:true,tension:.4,borderWidth:2.5,pointRadius:4,pointBackgroundColor:N},
+      {label:'PDD Emana Pay (projeção)',data:[null,null,null,null,null,3.4,3.1,2.9,2.7,2.5,2.3,2.2],borderColor:N,backgroundColor:'transparent',fill:false,tension:.4,borderWidth:1.5,borderDash:[6,4],pointRadius:3,pointBackgroundColor:N,pointStyle:'circle'}
+    ]
+  },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{mode:'index',callbacks:{label:c=>c.dataset.label+': '+c.parsed.y?.toFixed(1)+'%'}}},scales:{x:{grid:{display:false},ticks:{color:TC,maxRotation:35}},y:{min:0,max:15,grid:{color:GC},ticks:{color:TC,callback:v=>v+'%'},title:{display:true,text:'PDD %',color:TC,font:{size:10}}}}}});
+
+  /* ── NOVO: PDD acumulado projeção vs. realizado ── */
+  new Chart('chartPDDAcum',{type:'bar',data:{
+    labels:LBL_MES,
+    datasets:[
+      {type:'bar',label:'Realizado',data:[18,21,26,33,42,53,66,80,100,120,142,165],backgroundColor:N,borderRadius:6,borderSkipped:false},
+      {type:'line',label:'Projeção meta',data:[15,20,28,38,52,68,87,110,138,168,200,235],borderColor:G4,backgroundColor:'transparent',fill:false,tension:.4,borderWidth:2,borderDash:[6,4],pointRadius:3,pointBackgroundColor:G4}
+    ]
+  },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{mode:'index',callbacks:{label:c=>c.dataset.label+': R$'+c.parsed.y+'M'}}},scales:{x:{grid:{display:false},ticks:{color:TC,maxRotation:35}},y:{grid:{color:GC},ticks:{color:TC,callback:v=>'R$'+v+'M'}}}}});
+
+  /* ── NOVO: PDD consolidado mensal ── */
+  new Chart('chartPDDMes',{type:'line',data:{
+    labels:LBL_MES,
+    datasets:[
+      {label:'PDD consolidado',data:[12.1,11.95,11.78,11.55,11.25,10.88,10.48,10.05,9.60,9.22,8.90,8.60],borderColor:N,backgroundColor:'rgba(29,158,117,.07)',fill:true,tension:.4,borderWidth:2.5,pointRadius:4,pointBackgroundColor:N},
+      {label:'Tolerância máxima',data:[11,11,11,11,11,11,11,10,10,9.5,9,9],borderColor:R,backgroundColor:'transparent',fill:false,borderWidth:1.5,borderDash:[5,3],pointRadius:0,borderCapStyle:'round'}
+    ]
+  },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.dataset.label+': '+c.parsed.y.toFixed(2)+'%'}}},scales:{x:{grid:{display:false},ticks:{color:TC,maxRotation:35}},y:{min:7,max:13,grid:{color:GC},ticks:{color:TC,callback:v=>v+'%'}}}}});
+
+  /* score */
+  new Chart('chartScore',{type:'line',data:{labels:['Mês 1','Mês 2','Mês 3','Mês 4'],datasets:[{label:'Acurácia ML',data:[60,72,80,87],borderColor:N,backgroundColor:'rgba(29,158,117,.09)',fill:true,tension:.4,borderWidth:2.5,pointRadius:6,pointBackgroundColor:N},{label:'Meta 85%',data:[85,85,85,85],borderColor:R,fill:false,borderWidth:1.5,borderDash:[6,3],pointRadius:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.dataset.label+': '+c.parsed.y+'%'}}},scales:{x:{grid:{display:false},ticks:{color:TC}},y:{min:50,max:100,grid:{color:GC},ticks:{color:TC,callback:v=>v+'%'}}}}});
+
+  /* cohort */
+  new Chart('chartCohort',{type:'line',data:{labels:['M1','M2','M3','M4','M5','M6','M7','M8','M9','M10','M11','M12'],datasets:[{label:'Controle',data:[12,12.1,12,12.2,12.1,12,12.1,12.2,12,12.1,12,12.1],borderColor:R,backgroundColor:'rgba(217,64,64,.04)',fill:true,tension:.2,borderWidth:2,pointRadius:2,pointBackgroundColor:R},{label:'Tratado',data:[12,11.4,10.9,10.4,10.0,9.6,9.3,9.1,8.9,8.7,8.6,8.4],borderColor:N,backgroundColor:'rgba(29,158,117,.07)',fill:true,tension:.4,borderWidth:2,pointRadius:2,pointBackgroundColor:N}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.dataset.label+': '+c.parsed.y.toFixed(1)+'%'}}},scales:{x:{grid:{display:false},ticks:{color:TC}},y:{min:7,max:14,grid:{color:GC},ticks:{color:TC,callback:v=>v+'%'}}}}});
+
+  /* PDD regional */
+  new Chart('chartPDDRegion',{type:'bar',data:{labels:['Argentina','Brasil','México','Outros'],datasets:[{data:[15.4,12.1,10.2,9.5],backgroundColor:[R,G4,'rgba(239,159,39,.6)',GY],borderRadius:6,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'PDD: '+c.parsed.x+'%'}}},scales:{x:{grid:{color:GC},ticks:{color:TC,callback:v=>v+'%'},min:0,max:20},y:{grid:{display:false},ticks:{color:TC}}}}});
+
+  /* consultoras */
+  new Chart('chartConsultoras',{type:'doughnut',data:{labels:['Brasil','Argentina','México','Outros'],datasets:[{data:[58,20,14,8],backgroundColor:[N,R,G4,GY],borderWidth:0,hoverOffset:4}]},options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.label+': '+c.parsed+'%'}}}}});
+
+  /* riscos */
+  new Chart('chartRiscos',{type:'bubble',data:{datasets:[{label:'Violação de dados',data:[{x:60,y:90,r:16}],backgroundColor:'rgba(217,64,64,.22)',borderColor:R},{label:'Viés ML',data:[{x:55,y:80,r:13}],backgroundColor:'rgba(217,64,64,.14)',borderColor:R},{label:'Qualidade CPF',data:[{x:50,y:55,r:11}],backgroundColor:'rgba(212,136,15,.22)',borderColor:G4},{label:'Concentração tech',data:[{x:30,y:60,r:10}],backgroundColor:'rgba(212,136,15,.14)',borderColor:G4},{label:'Resistência cultural',data:[{x:25,y:30,r:8}],backgroundColor:'rgba(29,158,117,.18)',borderColor:N}]},options:{responsive:true,maintainAspectRatio:false,layout:{padding:14},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.dataset.label}}},scales:{x:{min:0,max:100,grid:{color:GC},ticks:{color:TC},title:{display:true,text:'Probabilidade →',color:TC,font:{size:10}}},y:{min:0,max:100,grid:{color:GC},ticks:{color:TC},title:{display:true,text:'Impacto →',color:TC,font:{size:10}}}}}});
+}
+
+window.addEventListener('load',()=>{buildCharts();window.cBuilt=true});
+
+/* ═══════════ SIMULATOR ═══════════ */
+function initSim(){
+  const s=document.getElementById('simSlider');
+  function u(){
+    const p=+s.value,vol=20*p/100;
+    const pdd=Math.round(vol*1000*0.121*0.3);
+    const ant=Math.round(vol*1000*0.5*0.05);
+    const mdr=Math.round(vol*1000*0.015);
+    const tot=pdd+ant+mdr,roi=Math.round(tot/40);
+    document.getElementById('simPct').textContent=p+'%';
+    document.getElementById('simVol').textContent=vol.toFixed(1);
+    document.getElementById('simPDD').textContent=pdd.toLocaleString('pt-BR');
+    document.getElementById('simAnt').textContent=ant.toLocaleString('pt-BR');
+    document.getElementById('simMDR').textContent=mdr.toLocaleString('pt-BR');
+    document.getElementById('simTotal').textContent=tot.toLocaleString('pt-BR');
+    document.getElementById('simROI').textContent='▲ ROI '+roi+'×';
+  }
+  s.addEventListener('input',u);u();
+}
+initSim();window.sBuilt=true;
+</script>
+</body>
+</html>
