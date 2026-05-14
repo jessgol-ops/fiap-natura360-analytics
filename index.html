@@ -82,12 +82,15 @@ body{
   box-shadow:var(--sh-top);border:1px solid var(--bdr);
   height:50px;display:flex;align-items:center;
   padding:5px 5px 5px 16px;gap:6px;
+  position:relative; /* needed for dropdown absolute positioning */
 }
 .tb-brand{display:flex;align-items:center;gap:7px;flex-shrink:0}
 .tb-icon{width:26px;height:26px;background:var(--n6);border-radius:8px;display:flex;align-items:center;justify-content:center}
 .tb-icon svg{width:14px;height:14px;fill:#fff}
 .tb-name{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--tx1);white-space:nowrap}
 .tb-sep{width:1px;height:20px;background:var(--bdr2);flex-shrink:0;margin:0 2px}
+
+/* Pills nav — visible only on wide desktop */
 .tb-nav{display:flex;align-items:center;gap:2px;flex:1;min-width:0;overflow-x:auto;scrollbar-width:none}
 .tb-nav::-webkit-scrollbar{display:none}
 .tn{
@@ -98,6 +101,8 @@ body{
 }
 .tn:hover{color:var(--tx2);background:var(--bg2)}
 .tn.active{background:var(--n6);color:#fff;box-shadow:0 1px 5px rgba(29,158,117,.3)}
+
+/* Right cluster */
 .tb-right{display:flex;align-items:center;gap:5px;flex-shrink:0}
 .tb-badge{font-size:11px;font-weight:500;padding:5px 11px;border-radius:999px;white-space:nowrap;line-height:1}
 .tbg{background:rgba(29,158,117,.1);color:var(--n7);border:1px solid rgba(29,158,117,.18)}
@@ -105,6 +110,68 @@ body{
 .tbr{background:rgba(217,64,64,.08);color:var(--r6);border:1px solid rgba(217,64,64,.16)}
 .live{width:7px;height:7px;border-radius:50%;background:var(--n5);flex-shrink:0;animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.72)}}
+
+/* ── HAMBURGER BUTTON — hidden on desktop, visible ≤1240px ── */
+.tb-hamburger{
+  display:none; /* shown via media query */
+  width:36px;height:36px;border-radius:999px;
+  border:1.5px solid var(--bdr2);background:var(--surf2);
+  cursor:pointer;flex-shrink:0;
+  align-items:center;justify-content:center;
+  transition:background .14s,border-color .14s;
+  outline:none;
+}
+.tb-hamburger:hover{background:var(--n1);border-color:var(--n4)}
+.tb-hamburger.open{background:var(--n1);border-color:var(--n4)}
+.tb-hamburger svg{width:16px;height:16px;stroke:var(--tx2);fill:none;stroke-width:2;stroke-linecap:round;transition:stroke .14s}
+.tb-hamburger.open svg{stroke:var(--n7)}
+
+/* ── DROPDOWN MENU ── */
+.tb-dropdown{
+  display:none;
+  position:absolute;
+  top:calc(100% + 10px);
+  right:0;
+  width:220px;
+  background:var(--surf);
+  border-radius:var(--rad);
+  box-shadow:var(--sh-top);
+  border:1px solid var(--bdr);
+  padding:6px;
+  z-index:500;
+  /* animation */
+  opacity:0;
+  transform:translateY(-8px) scale(.97);
+  transform-origin:top right;
+  transition:opacity .18s ease,transform .18s ease;
+}
+.tb-dropdown.open{
+  display:block;
+  animation:ddOpen .18s ease forwards;
+}
+@keyframes ddOpen{
+  from{opacity:0;transform:translateY(-8px) scale(.97)}
+  to  {opacity:1;transform:translateY(0)   scale(1)  }
+}
+/* Each item in dropdown */
+.tb-dd-item{
+  display:flex;align-items:center;gap:10px;
+  width:100%;padding:9px 12px;
+  border-radius:var(--rad-sm);border:none;background:transparent;
+  font-size:13px;font-weight:500;color:var(--tx2);
+  font-family:'DM Sans',sans-serif;text-align:left;
+  cursor:pointer;transition:background .12s,color .12s;
+  white-space:nowrap;
+}
+.tb-dd-item:hover{background:var(--bg2);color:var(--tx1)}
+.tb-dd-item.active{background:var(--n1);color:var(--n7);font-weight:600}
+.tb-dd-item .dd-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--tx3);flex-shrink:0;
+  transition:background .12s;
+}
+.tb-dd-item.active .dd-dot{background:var(--n6)}
+.tb-dd-sep{height:1px;background:var(--bdr);margin:4px 0}
 
 /* ── CONTENT ── */
 .content{grid-column:2;grid-row:2;padding:14px 18px 28px;overflow-y:auto;overflow-x:hidden;min-width:0}
@@ -308,11 +375,20 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:17px;heigh
 .wfl,.fnl{flex-shrink:0}
 
 /* ═══════════════════════════════════════
-   RESPONSIVE  —  4 breakpoints
-   1200 → 960 → 680 → 400
+   RESPONSIVE  —  5 breakpoints
+   1240 → 1200 → 960 → 680 → 400
 ═══════════════════════════════════════ */
 
-/* ── ≤1200px: desktop médio ── */
+/* ── ≤1240px: esconde pills, mostra hamburger ── */
+@media(max-width:1240px){
+  .tb-nav{display:none}
+  .tb-sep{display:none}
+  .tb-right{display:none}
+  .tb-brand{flex:1}
+  .tb-hamburger{display:flex}
+}
+
+/* ── ≤1200px: grids ── */
 @media(max-width:1200px){
   .g3{grid-template-columns:1fr 1fr}
   .g4{grid-template-columns:repeat(2,1fr)}
@@ -320,38 +396,23 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:17px;heigh
   .hmg{grid-template-columns:repeat(2,1fr)}
 }
 
-/* ── ≤960px: tablet ── */
+/* ── ≤960px: tablet — sidebar some ── */
 @media(max-width:960px){
   :root{--sb:0px}
   body{grid-template-columns:1fr}
   .sidebar{display:none}
   .topbar-wrap{grid-column:1;padding:10px 12px 0}
   .content{grid-column:1;padding:12px 12px 24px}
-
-  /* Grids 2+ col → 1 col */
   .g2,.g3,.g21,.g12{grid-template-columns:1fr}
-  /* Grids de 4 → 2 col */
   .g4{grid-template-columns:repeat(2,1fr)}
   .kg-44{grid-template-columns:repeat(2,1fr)}
   .kg-auto{grid-template-columns:repeat(2,1fr)}
   .hmg{grid-template-columns:repeat(2,1fr)}
-
-  /* Waterfall/funnel */
   .wfl{width:110px}
   .fnl{width:110px}
-
-  /* Topbar badges */
-  .tb-badge.hide-md{display:none}
-  .tn{padding:5px 10px;font-size:11.5px}
-
-  /* Título */
   .pt{font-size:20px}
-
-  /* Card padding */
   .card{padding:14px}
   .kc{padding:13px 13px 11px}
-
-  /* Alturas de chart menores em tablet */
   .ch-xs {height:120px}
   .ch-sm {height:150px}
   .ch-md {height:190px}
@@ -362,57 +423,38 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:17px;heigh
 
 /* ── ≤680px: mobile ── */
 @media(max-width:680px){
-  /* Topbar compact */
-  .topbar{border-radius:14px;height:46px;padding:4px 4px 4px 12px;gap:4px}
-  .tb-name,.tb-sep{display:none}
-  .tb-badge{display:none!important}
+  .topbar{border-radius:14px;height:46px;padding:4px 6px 4px 12px;gap:6px}
+  /* mantém nome visível no mobile */
+  .tb-name{font-size:12px}
+  .tb-icon{width:22px;height:22px;border-radius:7px}
   .live{display:none}
-  .tb-nav{gap:1px}
-  .tn{padding:5px 9px;font-size:11px}
-
-  /* KPIs 2 col */
   .kg-44,.kg-auto{grid-template-columns:repeat(2,1fr)}
   .g4{grid-template-columns:repeat(2,1fr)}
-
-  /* Título */
   .pt{font-size:18px}
   .ps{font-size:11px}
-
-  /* Waterfall/funnel mais estreito */
   .wfl{width:86px;font-size:10px}
   .fnl{width:88px;font-size:10px}
-
-  /* Heatmap 2 col */
   .hmg{grid-template-columns:1fr 1fr}
-
-  /* Label slider some */
   .sll{font-size:11px}
-
-  /* Alturas de chart menores em mobile */
   .ch-xs {height:110px}
   .ch-sm {height:140px}
   .ch-md {height:170px}
   .ch-lg {height:190px}
   .ch-xl {height:210px}
   .ch-2xl{height:220px}
-
-  /* Insights: ícone menor */
   .insi{width:28px;height:28px;font-size:14px}
-
-  /* Risk rows: quebra badge */
   .rkr{flex-wrap:wrap;gap:5px}
+  /* dropdown ocupa largura toda */
+  .tb-dropdown{right:0;left:0;width:auto;border-radius:14px}
 }
 
 /* ── ≤400px: mobile pequeno ── */
 @media(max-width:400px){
   .kg-44,.kg-auto,.g4{grid-template-columns:1fr}
-  .tn{padding:4px 7px;font-size:10.5px}
   .pt{font-size:16px}
   .wfl{width:72px;font-size:9.5px}
   .fnl{width:74px;font-size:9.5px}
   .hmg{grid-template-columns:1fr}
-
-  /* Alturas mínimas */
   .ch-xs {height:100px}
   .ch-sm {height:120px}
   .ch-md {height:150px}
@@ -444,13 +486,18 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:17px;heigh
 
 <!-- TOPBAR -->
 <div class="topbar-wrap">
-  <div class="topbar">
+  <div class="topbar" id="topbar">
+    <!-- Brand: sempre visível -->
     <div class="tb-brand">
       <div class="tb-icon"><svg viewBox="0 0 24 24"><path d="M12 3C9 3 7 5.5 7 8c0 2.1 1 3.9 2.7 4.9C7.8 14 6 16.3 6 19h2.2c0-2.1 1.7-3.8 3.8-3.8S15.8 16.9 15.8 19H18c0-2.7-1.8-5-4.2-6.1C15.5 11.8 16.5 10 16.5 8c0-2.8-2-5-4.5-5zm0 9.1c-2 0-3.5-1.5-3.5-3.1S10 5.8 12 5.8s3.5 1.5 3.5 3.2-1.5 3.1-3.5 3.1z"/></svg></div>
       <span class="tb-name">Natura · Ecossistema 360</span>
     </div>
+
+    <!-- Separador: só desktop -->
     <div class="tb-sep"></div>
-    <nav class="tb-nav">
+
+    <!-- Pills: só desktop (≥1241px) -->
+    <nav class="tb-nav" aria-label="Abas de conteúdo">
       <button class="tn active" data-tab="overview"      >Visão geral</button>
       <button class="tn"        data-tab="financeiro"    >Projeção</button>
       <button class="tn"        data-tab="adocao"        >Adoção</button>
@@ -461,11 +508,38 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:17px;heigh
       <button class="tn"        data-tab="riscos"        >Riscos</button>
       <button class="tn"        data-tab="insights"      >Insights</button>
     </nav>
+
+    <!-- Badges + live: só desktop -->
     <div class="tb-right">
       <div class="live"></div>
       <span class="tb-badge tbr hide-md">PDD 12,1%</span>
       <span class="tb-badge tbg">R$966M</span>
       <span class="tb-badge tbo hide-md">GUT 125</span>
+    </div>
+
+    <!-- Hamburger: visível ≤1240px -->
+    <button class="tb-hamburger" id="tbHamburger" aria-label="Menu de navegação" aria-expanded="false" aria-controls="tbDropdown">
+      <!-- Ícone: 3 linhas → X via CSS class .open -->
+      <svg id="hbIcon" viewBox="0 0 20 20">
+        <line x1="3" y1="6"  x2="17" y2="6"  />
+        <line x1="3" y1="10" x2="17" y2="10" />
+        <line x1="3" y1="14" x2="17" y2="14" />
+      </svg>
+    </button>
+
+    <!-- Dropdown menu: aparece ao clicar no hamburger -->
+    <div class="tb-dropdown" id="tbDropdown" role="menu" aria-hidden="true">
+      <button class="tb-dd-item active" data-tab="overview"      role="menuitem"><span class="dd-dot"></span>Visão geral</button>
+      <button class="tb-dd-item"        data-tab="financeiro"    role="menuitem"><span class="dd-dot"></span>Projeção financeira</button>
+      <button class="tb-dd-item"        data-tab="adocao"        role="menuitem"><span class="dd-dot"></span>Funil de adoção</button>
+      <button class="tb-dd-item"        data-tab="inadimplencia" role="menuitem"><span class="dd-dot"></span>Inadimplência</button>
+      <div class="tb-dd-sep"></div>
+      <button class="tb-dd-item"        data-tab="score"         role="menuitem"><span class="dd-dot"></span>Score IA &amp; crédito</button>
+      <button class="tb-dd-item"        data-tab="regional"      role="menuitem"><span class="dd-dot"></span>Análise regional</button>
+      <div class="tb-dd-sep"></div>
+      <button class="tb-dd-item"        data-tab="dados"         role="menuitem"><span class="dd-dot"></span>Dados &amp; decisões</button>
+      <button class="tb-dd-item"        data-tab="riscos"        role="menuitem"><span class="dd-dot"></span>Riscos de dados</button>
+      <button class="tb-dd-item"        data-tab="insights"      role="menuitem"><span class="dd-dot"></span>Insights</button>
     </div>
   </div>
 </div>
@@ -828,6 +902,73 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:17px;heigh
   window.addEventListener('resize',()=>{if(cur)pos(cur)},{passive:true});
 })();
 
+/* ═══════════ HAMBURGER MENU ═══════════ */
+(function(){
+  const btn   = document.getElementById('tbHamburger');
+  const drop  = document.getElementById('tbDropdown');
+  const icon  = document.getElementById('hbIcon');
+  if(!btn||!drop) return;
+
+  /* SVG lines: 3-line icon → X icon */
+  const ICON_MENU = `<line x1="3" y1="6"  x2="17" y2="6"  />
+                     <line x1="3" y1="10" x2="17" y2="10" />
+                     <line x1="3" y1="14" x2="17" y2="14" />`;
+  const ICON_X    = `<line x1="4" y1="4" x2="16" y2="16"/>
+                     <line x1="16" y1="4" x2="4" y2="16"/>`;
+
+  function openMenu(){
+    drop.classList.add('open');
+    btn.classList.add('open');
+    btn.setAttribute('aria-expanded','true');
+    drop.setAttribute('aria-hidden','false');
+    icon.innerHTML = ICON_X;
+  }
+  function closeMenu(){
+    drop.classList.remove('open');
+    btn.classList.remove('open');
+    btn.setAttribute('aria-expanded','false');
+    drop.setAttribute('aria-hidden','true');
+    icon.innerHTML = ICON_MENU;
+  }
+  function toggleMenu(){ drop.classList.contains('open') ? closeMenu() : openMenu(); }
+
+  btn.addEventListener('click', e => { e.stopPropagation(); toggleMenu(); });
+
+  /* Click on a dropdown item navigates and closes */
+  drop.querySelectorAll('.tb-dd-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const tab = item.dataset.tab;
+      if(tab){
+        goto(tab, null, null);         /* reuse existing goto() */
+        /* sync pill state too */
+        document.querySelectorAll('.tn').forEach(t =>
+          t.classList.toggle('active', t.dataset.tab === tab));
+        /* sync dropdown state */
+        drop.querySelectorAll('.tb-dd-item').forEach(d =>
+          d.classList.toggle('active', d.dataset.tab === tab));
+      }
+      closeMenu();
+    });
+  });
+
+  /* Close on outside click */
+  document.addEventListener('click', e => {
+    if(!btn.contains(e.target) && !drop.contains(e.target)) closeMenu();
+  });
+
+  /* Close on Escape */
+  document.addEventListener('keydown', e => {
+    if(e.key==='Escape') closeMenu();
+  });
+
+  /* Keep dropdown state in sync when goto() is called from sidebar or pills */
+  const _origGoto = window.goto;  /* patch after goto is defined */
+  window.__syncDropdown = function(tabId){
+    drop.querySelectorAll('.tb-dd-item').forEach(d =>
+      d.classList.toggle('active', d.dataset.tab === tabId));
+  };
+})();
+
 /* ═══════════ NAVIGATION ═══════════ */
 const TABS=['overview','financeiro','adocao','inadimplencia','score','regional','dados','riscos','insights'];
 
@@ -840,6 +981,8 @@ function goto(id,sbBtn,tnBtn){
   const idx=TABS.indexOf(id);
   (sbBtn||document.querySelectorAll('.sb-btn')[idx])?.classList.add('active');
   (tnBtn||document.querySelectorAll('.tn')[idx])?.classList.add('active');
+  /* sync hamburger dropdown */
+  if(typeof window.__syncDropdown==='function') window.__syncDropdown(id);
   if(!window.cBuilt){buildCharts();window.cBuilt=true}
   if(id==='financeiro'&&!window.sBuilt){initSim();window.sBuilt=true}
 }
